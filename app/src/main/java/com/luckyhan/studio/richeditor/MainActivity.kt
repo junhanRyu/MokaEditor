@@ -10,7 +10,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val editor = findViewById<RichEditor>(R.id.editor)
+        val editor = findViewById<RichEditText>(R.id.editor)
         val add = findViewById<Button>(R.id.add)
         val remove = findViewById<Button>(R.id.remove)
 

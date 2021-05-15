@@ -11,12 +11,11 @@
         android:layout_height="match_parent"
         >
 
-        <com.luckyhan.studio.richeditor.RichEditor
+        <com.luckyhan.studio.richeditor.RichEditText
             android:id="@+id/editor"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="aaa\naaa\naaa"
-            android:inputType="textVisiblePassword|textMultiLine"
             app:layout_constrainedHeight="true"
             app:layout_constraintBottom_toTopOf="@id/buttons"
             app:layout_constraintEnd_toEndOf="parent"

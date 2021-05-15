@@ -1,4 +1,4 @@
-package com.luckyhan.studio.richeditor
+package com.luckyhan.studio.richeditor.span.paragraph
 
 import android.content.Context
 import android.graphics.Canvas
@@ -7,9 +7,10 @@ import android.graphics.drawable.Drawable
 import android.text.Layout
 import android.text.Spanned
 import android.text.style.LeadingMarginSpan
-import android.text.style.UpdateLayout
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.luckyhan.studio.richeditor.DisplayUnitUtil
+import com.luckyhan.studio.richeditor.R
 
 class CheckBoxSpan : LeadingMarginSpan.Standard{
     private var context : Context? = null
