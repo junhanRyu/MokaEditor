@@ -2,7 +2,6 @@ package com.luckyhan.studio.richeditor
 
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.text.TextWatcher
 import android.text.style.CharacterStyle
 import android.text.style.ParagraphStyle
 import android.util.Log
@@ -11,21 +10,25 @@ import com.luckyhan.studio.richeditor.span.RichSpannable
 import kotlin.IllegalStateException
 
 class Selection(private val editText: EditText, private var selectionStart: Int, private var selectionEnd: Int) {
-    private val zeroWidthChar = "\u200B"
-    private var previousText : String? = null
+    private var previousText: String? = null
     private val spannable = editText.text
     private val paragraphs: ArrayList<Paragraph> = ArrayList()
     private val characterSpans: ArrayList<SpanModel> = ArrayList()
 
     fun onBeforeTextChanged() {
         previousText = spannable.toString()
+        storeCharacterSpans()
+        storeParagraphs()
+        removeAllStoredSpans()
     }
 
-    fun onAfterTextChanged() {
-
+    fun onAfterTextChanged(start: Int, lengthBefore: Int, lengthAfter: Int) {
+        removeTextWatcher()
+        restoreCharacterSpans(start, lengthBefore, lengthAfter)
+        setTextWatcher()
     }
 
-    fun <T>isThereSpan(spanType : Class<T>) : Boolean{
+    fun <T> isThereSpan(spanType: Class<T>): Boolean {
         val spans = spannable.getSpans(selectionStart, selectionEnd, spanType)
         return spans.isNotEmpty()
     }
@@ -38,17 +41,52 @@ class Selection(private val editText: EditText, private var selectionStart: Int,
                 val spanEnd = spannable.getSpanEnd(span)
                 val spanFlag = spannable.getSpanFlags(span)
                 characterSpans.add(SpanModel(span, spanFlag, spanStart, spanEnd))
-            } else {
-                throw IllegalStateException("span is not RichSpannable!")
             }
         }
     }
 
-    private fun restoreCharacterSpans() {
-        if(previousText == null){
+    private fun restoreCharacterSpans(start: Int, before: Int, after: Int) {
+        if (previousText == null) {
             throw IllegalStateException("Spans are not stored before!")
-        }else{
-
+        } else {
+            val afterEnd = start + after
+            val beforeEnd = start + before
+            val offset = after - before
+            Log.d("selection", "start : $start, before : $before, after : $after")
+            Log.d("selection", "afterEnd : $afterEnd, beforeEnd : $beforeEnd, offset : $offset")
+            for (spanModel in characterSpans) {
+                val span = spanModel.span
+                val spanStart = spanModel.start
+                val spanEnd = spanModel.end
+                val flag = spanModel.flag
+                if(spanEnd < start){
+                    spannable.setSpan(span, spanStart, spanEnd, flag)
+                }else if((beforeEnd in spanStart until spanEnd && start <= spanStart)){
+                    if(flag == Spannable.SPAN_INCLUSIVE_INCLUSIVE || flag == Spannable.SPAN_INCLUSIVE_EXCLUSIVE){
+                        //stretch spans
+                        spannable.setSpan(span, start, spanEnd+offset, flag)
+                    }else{
+                        spannable.setSpan(span, afterEnd, spanEnd+offset, flag)
+                    }
+                }else if(start in spanStart .. spanEnd && beforeEnd >= spanEnd){
+                    if(flag == Spannable.SPAN_INCLUSIVE_INCLUSIVE || flag == Spannable.SPAN_EXCLUSIVE_INCLUSIVE){
+                        //stretch spans
+                        spannable.setSpan(span, spanStart, afterEnd, flag)
+                    }else{
+                        spannable.setSpan(span, spanStart, start, flag)
+                    }
+                }else if(spanStart < start && beforeEnd <= spanEnd){
+                    //stretch spans
+                    spannable.setSpan(span, spanStart, spanEnd+offset, flag)
+                }else if(spanStart >= start && spanEnd <= beforeEnd){
+                    //don't restore spans
+                }else if(beforeEnd < spanStart){
+                    spannable.setSpan(span, spanStart, spanEnd, flag)
+                }else{
+                    Log.e("selection", "spanStart : $spanStart, spanEnd : $spanEnd, textStart : $start, textEnd : $beforeEnd")
+                    throw IllegalStateException("out of ranges!")
+                }
+            }
         }
     }
 
@@ -71,16 +109,35 @@ class Selection(private val editText: EditText, private var selectionStart: Int,
         }
     }
 
-    private fun restoreParagraphs(){
-        if(previousText == null){
+    private fun restoreParagraphs(start: Int, before: Int, after: Int) {
+        if (previousText == null) {
             throw IllegalStateException("Spans are not stored before!")
-        }else{
+        } else {
+            val afterEnd = start + after
+            val beforeEnd = start + before
+            val offset = after - before
 
+            if(offset == 1 && spannable.toString().substring(start, afterEnd) == "\n"){
+                Log.d("selection", "new line!")
+            }else if(offset == -1 && previousText?.substring(start, beforeEnd) == Paragraph.zeroWidthChar){
+                Log.d("selection", "span deleted!")
+            }else{
+                for(paragraph in paragraphs){
+
+                }
+            }
         }
     }
 
-    private fun removeAllSpans() {
-        spannable.clearSpans()
+    private fun removeAllStoredSpans() {
+        for (span in characterSpans) {
+            spannable.removeSpan(span)
+        }
+        removeTextWatcher()
+        for (paragraph in paragraphs) {
+            paragraph.removeSpans(spannable)
+        }
+        setTextWatcher()
     }
 
     fun setCharacterSpan(span: CharacterStyle) {
@@ -92,33 +149,29 @@ class Selection(private val editText: EditText, private var selectionStart: Int,
         for (span in spans) {
             val spanStart = spannable.getSpanStart(span)
             val spanEnd = spannable.getSpanEnd(span)
-
-            if (selectionStart in (spanStart + 1) .. spanEnd && spanEnd in selectionStart .. selectionEnd) { // [ span { ] selection }
-                spannable.removeSpan(span)
-                spannable.setSpan(span, spanStart, selectionStart, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-            } else if (selectionEnd in (spanStart + 1) until spanEnd && spanStart in selectionStart until selectionEnd) { // { selection [} span ]
-                spannable.removeSpan(span)
+            spannable.removeSpan(span)
+            if(selectionEnd in spanStart until spanEnd && selectionStart <= spanStart){
                 spannable.setSpan(span, selectionEnd, spanEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-            } else if (spanStart in selectionStart .. selectionEnd && spanEnd in selectionStart .. selectionEnd) {   // { selection [span] }
-                spannable.removeSpan(span)
-            } else if (selectionStart in (spanStart+1) until spanEnd && selectionEnd in (spanStart+1) until spanEnd) { // { span [selection] }
-                if(span is RichSpannable){
-                    val otherSpan = span.copy()
-                    spannable.removeSpan(span)
+            }else if(selectionStart in spanStart .. spanEnd && selectionEnd >= spanEnd){
+                spannable.setSpan(span, spanStart, selectionStart, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+            }else if(spanStart < selectionStart && selectionEnd <= spanEnd){
+                if (span is RichSpannable) {
+                    val oppositeSpan = span.copy()
                     spannable.setSpan(span, spanStart, selectionStart, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-                    spannable.setSpan(otherSpan, selectionEnd, spanEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-                }else{
-                    Log.e("selection", "selectionStart : $selectionStart, selectionEnd : $selectionEnd, spanStart : $spanStart, spanEnd : $spanEnd")
+                    spannable.setSpan(oppositeSpan, selectionEnd, spanEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                } else {
                     throw IllegalStateException("this span is not supported!")
                 }
-            } else {
-                Log.e("selection", "selectionStart : $selectionStart, selectionEnd : $selectionEnd, spanStart : $spanStart, spanEnd : $spanEnd")
-                throw IllegalStateException("Out of ranges!")
+            }else if(spanStart >= selectionStart && spanEnd <= selectionEnd){
+                //already done
+            }
+            else{
+                throw IllegalStateException("out of ranges!")
             }
         }
     }
 
-    fun setParagraphSpan(span : RichSpannable){
+    fun setParagraphSpan(span: RichSpannable) {
         val lineStart = getStartOfLine(spannable.toString(), selectionStart)
         val lineEnd = getEndOfLine(spannable.toString(), selectionEnd)
         val subString = spannable.toString().substring(lineStart, lineEnd)
@@ -130,9 +183,9 @@ class Selection(private val editText: EditText, private var selectionStart: Int,
             for (line in lines) {
                 val otherSpan = span.copy()
                 end += line.length
-                if(spannable is SpannableStringBuilder){
-                    spannable.insert(start, zeroWidthChar)
-                    spannable.setSpan(otherSpan, start, end+1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
+                if (spannable is SpannableStringBuilder) {
+                    spannable.insert(start, Paragraph.zeroWidthChar)
+                    spannable.setSpan(otherSpan, start, end + 1, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
                     start++
                 }
                 start += line.length + 1
@@ -142,33 +195,33 @@ class Selection(private val editText: EditText, private var selectionStart: Int,
         }
     }
 
-    fun <T>removeParagraphSpan(spanType : Class<T>){
+    fun <T> removeParagraphSpan(spanType: Class<T>) {
         val spans = spannable.getSpans(selectionStart, selectionEnd, spanType)
         //TextWatcher has to be removed from here
         removeTextWatcher()
-        for(span in spans){
-            if(spannable is SpannableStringBuilder){
+        for (span in spans) {
+            if (spannable is SpannableStringBuilder) {
                 val spanStart = spannable.getSpanStart(span)
                 spannable.removeSpan(span)
                 //debug
-                if(spannable.substring(spanStart, spanStart+1) == zeroWidthChar){
+                if (spannable.substring(spanStart, spanStart + 1) == Paragraph.zeroWidthChar) {
                     Log.d("selection", "zero width there!")
                 }
-                spannable.delete(spanStart, spanStart+1)
+                spannable.delete(spanStart, spanStart + 1)
             }
         }
         setTextWatcher()
     }
 
-    private fun removeTextWatcher(){
-        if(editText is TextWatcher){
-            editText.removeTextChangedListener(editText)
+    private fun removeTextWatcher() {
+        if (editText is RichEditText) {
+            editText.removeTextChangedListener(editText.textWatcher)
         }
     }
 
-    private fun setTextWatcher(){
-        if(editText is TextWatcher){
-            editText.addTextChangedListener(editText)
+    private fun setTextWatcher() {
+        if (editText is RichEditText) {
+            editText.addTextChangedListener(editText.textWatcher)
         }
     }
 

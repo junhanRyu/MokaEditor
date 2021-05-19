@@ -1,11 +1,8 @@
 package com.luckyhan.studio.richeditor
 
 import android.content.Context
-import android.graphics.Typeface
 import android.text.*
-import android.text.style.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
@@ -17,8 +14,24 @@ import com.luckyhan.studio.richeditor.span.paragraph.CheckBoxSpan
 import com.luckyhan.studio.richeditor.span.paragraph.RichBulletSpan
 import kotlin.math.roundToInt
 
-class RichEditText : AppCompatEditText, TextWatcher {
+class RichEditText : AppCompatEditText {
     var isTouched = false
+    var beforeSelection : Selection? = null
+
+    val textWatcher = object : TextWatcher{
+        override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            beforeSelection = Selection(this@RichEditText, start, start+count)
+            beforeSelection?.onBeforeTextChanged()
+        }
+
+        override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+            beforeSelection?.onAfterTextChanged(start, before, count)
+        }
+
+        override fun afterTextChanged(s: Editable?) {
+            beforeSelection = null
+        }
+    }
 
     private inner class RichEditorInputConnection(target: InputConnection, mutable: Boolean) :
         InputConnectionWrapper(target, mutable) {
@@ -38,7 +51,7 @@ class RichEditText : AppCompatEditText, TextWatcher {
     }
 
     init {
-        addTextChangedListener(this)
+        addTextChangedListener(textWatcher)
     }
 
     constructor(context: Context) : super(context) {
@@ -210,16 +223,5 @@ class RichEditText : AppCompatEditText, TextWatcher {
             }
         }
     }
-
-    override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-    }
-
-    override fun onTextChanged(text: CharSequence?, start: Int, lengthBefore: Int, lengthAfter: Int) {
-        super.onTextChanged(text, start, lengthBefore, lengthAfter)
-    }
-
-    override fun afterTextChanged(s: Editable?) {
-    }
-
 
 }
