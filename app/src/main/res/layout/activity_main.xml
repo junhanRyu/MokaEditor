@@ -30,15 +30,20 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
             <Button
-                android:id="@+id/add"
+                android:id="@+id/bullet"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Bullet"/>
             <Button
-                android:id="@+id/remove"
+                android:id="@+id/checkbox"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="remove"/>
+                android:text="Checkbox"/>
+            <Button
+                android:id="@+id/bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bold"/>
 
 
         </LinearLayout>

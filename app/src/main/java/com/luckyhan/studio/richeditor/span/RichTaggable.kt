@@ -1,6 +1,6 @@
 package com.luckyhan.studio.richeditor.span
 
-interface Taggable {
+interface RichTaggable {
     fun getOpeningTag() : String
     fun getClosingTag() : String
 }

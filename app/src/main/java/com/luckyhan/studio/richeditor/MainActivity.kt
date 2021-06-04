@@ -11,15 +11,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val editor = findViewById<RichEditText>(R.id.editor)
-        val add = findViewById<Button>(R.id.add)
-        val remove = findViewById<Button>(R.id.remove)
+        val bullet = findViewById<Button>(R.id.bullet)
+        val checkbox = findViewById<Button>(R.id.checkbox)
+        val bold = findViewById<Button>(R.id.bold)
 
-        add.setOnClickListener{
-            editor.addBullet()
+        bullet.setOnClickListener{
+            editor.toggleBullet()
         }
-
-        remove.setOnClickListener{
-            editor.addBold()
+        checkbox.setOnClickListener{
+            editor.toggleCheckBox()
+        }
+        bold.setOnClickListener{
+            editor.toggleBold()
         }
     }
 

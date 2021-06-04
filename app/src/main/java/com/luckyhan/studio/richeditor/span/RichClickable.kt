@@ -1,6 +1,6 @@
 package com.luckyhan.studio.richeditor.span
 
-interface Clickable {
+interface RichClickable {
     var clickableLeft : Int
     var clickableRight : Int
     var clickableTop : Int

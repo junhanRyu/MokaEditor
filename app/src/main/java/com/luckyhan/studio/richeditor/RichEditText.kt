@@ -10,8 +10,9 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import androidx.appcompat.widget.AppCompatEditText
+import com.luckyhan.studio.richeditor.span.RichClickable
 import com.luckyhan.studio.richeditor.span.character.RichBoldSpan
-import com.luckyhan.studio.richeditor.span.paragraph.CheckBoxSpan
+import com.luckyhan.studio.richeditor.span.paragraph.RichCheckBoxSpan
 import com.luckyhan.studio.richeditor.span.paragraph.RichBulletSpan
 import kotlin.math.roundToInt
 
@@ -83,7 +84,7 @@ class RichEditText : AppCompatEditText {
         return RichEditorInputConnection(super.onCreateInputConnection(outAttrs), true)
     }
 
-    fun addBold() {
+    fun toggleBold() {
         val spanTool = RichSpanTool(this)
         val isBold = spanTool.isThereSpan(RichBoldSpan::class.java)
         if(isBold){
@@ -94,7 +95,7 @@ class RichEditText : AppCompatEditText {
         }
     }
 
-    fun addBullet() {
+    fun toggleBullet() {
         val spanTool = RichSpanTool(this)
         val isBullet = spanTool.isThereSpan(RichBulletSpan::class.java)
         if(isBullet){
@@ -105,15 +106,28 @@ class RichEditText : AppCompatEditText {
         }
     }
 
+    fun toggleCheckBox() {
+        val spanTool = RichSpanTool(this)
+        val isCheckBox = spanTool.isThereSpan(RichCheckBoxSpan::class.java)
+        if(isCheckBox){
+            spanTool.removeParagraphSpan(RichCheckBoxSpan::class.java)
+        }else{
+            val spannable = this.text as Spannable
+            val span = RichCheckBoxSpan(context, spannable)
+            spanTool.addParagraphSpan(span)
+        }
+    }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {
             MotionEvent.ACTION_UP -> {
                 if (isTouched) {
                     isTouched = false
-                    val checkBoxSpan = isChecked(event.x, event.y)
-                    if (checkBoxSpan != null) {
-                        toggleCheckBox(checkBoxSpan)
+                    val clickableSpans = getClickableSpans(event.x, event.y)
+                    if (clickableSpans?.isNotEmpty() == true){
+                        clickableSpans.forEach{
+                            it.onClicked()
+                        }
                         return true
                     }
                 }
@@ -121,117 +135,30 @@ class RichEditText : AppCompatEditText {
             }
             MotionEvent.ACTION_DOWN -> {
                 isTouched = true
-                val checkBoxSpan = isChecked(event.x, event.y)
-                if (checkBoxSpan != null)
-                    return true
-                return super.onTouchEvent(event)
+                val clickableSpans = getClickableSpans(event.x, event.y)
+                return if (clickableSpans?.isNotEmpty() == true)
+                    true
+                else
+                    super.onTouchEvent(event)
             }
             else -> {
-                isTouched = false
                 return super.onTouchEvent(event)
             }
         }
     }
 
-    private fun isChecked(x: Float, y: Float): CheckBoxSpan? {
-        val padding: Int = totalPaddingTop + totalPaddingBottom
-        val areaTop: Int = scrollY + y.roundToInt() - totalPaddingTop
-        val areaBot: Int = areaTop + height - padding
+    private fun getClickableSpans(x: Float, y: Float): List<RichClickable>? {
+        val positionFromTop: Int = scrollY + y.roundToInt() - totalPaddingTop
+        val numberOfLine = layout.getLineForVertical(positionFromTop)
+        val firstOfLine = layout.getLineStart(numberOfLine)
+        val endOfLine = layout.getLineEnd(numberOfLine)
 
-        val lineTop = layout.getLineForVertical(areaTop)
-        val lineBot = layout.getLineForVertical(areaBot)
-
-        val first = layout.getLineStart(lineTop)
-        val end = layout.getLineEnd(lineTop)
-        val clickedCharOffset = layout.getOffsetForHorizontal(lineTop, (x - paddingStart))
-
-        val spans = text?.getSpans(first, end, CheckBoxSpan::class.java)
-        spans?.let {
-            for (span in spans) {
-                if (span.isChecked(
-                        x.roundToInt() - totalPaddingLeft,
-                        y.roundToInt() - totalPaddingTop
-                    )
-                ) {
-                    return span
-                }
-            }
-        }
-        return null
-    }
-
-    private fun isCheckBox(start: Int, end: Int): Boolean {
-        val spans = text?.getSpans(start, end, CheckBoxSpan::class.java)
-        return ((spans?.size ?: 0) > 0)
-    }
-
-    fun toggleCheckBox(span: CheckBoxSpan) {
-        val start = text?.getSpanStart(span) ?: -1
-        val end = text?.getSpanEnd(span) ?: -1
-        if (start != -1 && end != -1) {
-            val checked = !span.checked
-            val newSpan = CheckBoxSpan(context, checked)
-            text?.setSpan(newSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-            text?.removeSpan(span)
-        }
-    }
-
-    fun addCheckBox() {
-        var start = selectionStart
-        val end = selectionEnd
-        val lines = text?.split("\n")
-        lines?.let {
-            var lineStart = 0
-            var lineEnd = 0
-            for (line in lines.indices) {
-                lineEnd += lines[line].length
-                if (lineStart > end) break
-                if (lineEnd < start) {
-                    lineStart += lines[line].length + 1
-                    lineEnd += 1
-                    continue
-                }
-                if (line != lines.size - 1) {
-                    lineEnd += 1
-                }
-                if (isCheckBox(lineStart, lineEnd)) continue
-                val newSpan = CheckBoxSpan(context, false)
-                text?.setSpan(newSpan, lineStart, lineEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-                lineStart += lines[line].length + 1
-
-            }
-        }
-        /*while (start <= end) {
-            val line = layout.getLineForOffset(start)
-            val lineStart = layout.getLineStart(line)
-            val lineEnd = layout.getLineEnd(line)
-            Log.d("span", "line: ${line}, lineStart : ${lineStart}, lineEnd : ${lineEnd}")
-            start = lineEnd + 1
-            if (isCheckBox(lineStart, lineEnd)) {
-                continue
-            }
-            val newSpan = CheckBoxSpan(context)
-            text?.setSpan(newSpan, lineStart, lineEnd, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-        }*/
-    }
-
-    fun removeCheckBox() {
-        var start = selectionStart
-        val end = selectionEnd
-        while (start <= end) {
-            val line = layout.getLineForOffset(start)
-            val lineStart = layout.getLineStart(line)
-            val lineEnd = layout.getLineEnd(line)
-            start = lineEnd + 1
-            if (!isCheckBox(lineStart, lineEnd)) {
-                continue
-            }
-            val spans = text?.getSpans(lineStart, lineEnd, CheckBoxSpan::class.java)
-            spans?.let {
-                for (span in spans) {
-                    text?.removeSpan(span)
-                }
-            }
+        val spans = text?.getSpans(firstOfLine, endOfLine, RichClickable::class.java)
+        return spans?.filter {
+            val posX = x.roundToInt() - totalPaddingLeft
+            val posY = y.roundToInt() - totalPaddingTop
+            Log.d("RichCheckBoxSpan", "posX : $posX, posY : $posY")
+            (posX in it.clickableLeft .. it.clickableRight && posY in it.clickableTop .. it.clickableBottom)
         }
     }
 
