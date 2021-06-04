@@ -3,6 +3,7 @@ package com.luckyhan.studio.richeditor
 import android.content.Context
 import android.text.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.inputmethod.EditorInfo
@@ -16,20 +17,34 @@ import kotlin.math.roundToInt
 
 class RichEditText : AppCompatEditText {
     var isTouched = false
-    var beforeSelection : Selection? = null
 
-    val textWatcher = object : TextWatcher{
+    private val textWatcher = object : TextWatcher {
+        var spanCollector: RichSpanCollector? = null
+        var start: Int = 0
+        var before: Int = 0
+        var after: Int = 0
+
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            beforeSelection = Selection(this@RichEditText, start, start+count)
-            beforeSelection?.onBeforeTextChanged()
+            if (s is Spannable) {
+                spanCollector = RichSpanCollector()
+                spanCollector?.collect(s)
+            }
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            beforeSelection?.onAfterTextChanged(start, before, count)
+            this.start = start
+            this.after = count
+            this.before = before
         }
 
         override fun afterTextChanged(s: Editable?) {
-            beforeSelection = null
+            if (s is SpannableStringBuilder) {
+                Log.d(this.javaClass.name, "watcher depth ${s.textWatcherDepth}")
+                spanCollector?.let{
+                    val composer = RichSpanComposer()
+                    composer.compose(s, it, start, before, after)
+                }
+            }
         }
     }
 
@@ -68,29 +83,25 @@ class RichEditText : AppCompatEditText {
         return RichEditorInputConnection(super.onCreateInputConnection(outAttrs), true)
     }
 
-    override fun onSelectionChanged(selStart: Int, selEnd: Int) {
-        super.onSelectionChanged(selStart, selEnd)
-    }
-
     fun addBold() {
-        val selection = Selection(this, selectionStart, selectionEnd)
-        val isBold = selection.isThereSpan(RichBoldSpan::class.java)
+        val spanTool = RichSpanTool(this)
+        val isBold = spanTool.isThereSpan(RichBoldSpan::class.java)
         if(isBold){
-            selection.removeCharacterSpan(RichBoldSpan::class.java)
+            spanTool.removeCharacterSpan(RichBoldSpan::class.java)
         }else{
             val span = RichBoldSpan()
-            selection.setCharacterSpan(span)
+            spanTool.addCharacterSpan(span)
         }
     }
 
     fun addBullet() {
-        val selection = Selection(this, selectionStart, selectionEnd)
-        val isBullet = selection.isThereSpan(RichBulletSpan::class.java)
+        val spanTool = RichSpanTool(this)
+        val isBullet = spanTool.isThereSpan(RichBulletSpan::class.java)
         if(isBullet){
-            selection.removeParagraphSpan(RichBulletSpan::class.java)
+            spanTool.removeParagraphSpan(RichBulletSpan::class.java)
         }else{
             val span = RichBulletSpan()
-            selection.setParagraphSpan(span)
+            spanTool.addParagraphSpan(span)
         }
     }
 

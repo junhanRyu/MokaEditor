@@ -1,16 +1,10 @@
 package com.luckyhan.studio.richeditor
 
 import android.text.Spannable
-import android.text.SpannableStringBuilder
 import android.text.style.ParagraphStyle
-import com.luckyhan.studio.richeditor.span.RichSpannable
 
-class Paragraph(private var start : Int, private var end : Int) {
-    private val paragraphSpans : ArrayList<SpanModel> = ArrayList()
-
-    companion object{
-        const val zeroWidthChar = "\u200B"
-    }
+class Paragraph(var start : Int, var end : Int) {
+    /*private val paragraphSpans : ArrayList<SpanModel> = ArrayList()
 
     fun storeSpans(spannable : Spannable){
         val spans = spannable.getSpans(start, end, ParagraphStyle::class.java)
@@ -26,17 +20,31 @@ class Paragraph(private var start : Int, private var end : Int) {
     }
 
     fun removeSpans(spannable : Spannable){
-        for(span in paragraphSpans){
-            spannable.removeSpan(span)
-        }
-        if(paragraphSpans.isNotEmpty()){
-            if(spannable is SpannableStringBuilder){
-                if(spannable.substring(start, start+1) == zeroWidthChar){
-                    spannable.delete(start, start+1) // remove zero width character
-                    start--
-                    end--
-                }
-            }
+        for(spanModel in paragraphSpans){
+            spannable.removeSpan(spanModel.span)
         }
     }
+
+    fun restoreSpans(spannable : Spannable, newStart : Int, newEnd : Int){
+        if(newEnd - newStart <= 0){
+            return
+        }
+        for(spanModel in paragraphSpans){
+            spannable.setSpan(spanModel.span, newStart, newEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }
+
+    fun copySpans(spannable : Spannable, newStart : Int, newEnd : Int){
+        if(newEnd - newStart <= 0){
+            return
+        }
+        for(spanModel in paragraphSpans){
+            val otherSpan = spanModel.span.copy()
+            spannable.setSpan(otherSpan, newStart, newEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+    }
+
+    fun isSpans() : Boolean{
+        return paragraphSpans.isNotEmpty()
+    }*/
 }
