@@ -1,4 +1,4 @@
-package com.luckyhan.studio.richeditor.span.paragraph
+package com.luckyhan.studio.mokaeditor.span.paragraph
 
 import android.content.Context
 import android.graphics.Canvas
@@ -11,24 +11,24 @@ import android.text.Spanned
 import android.text.style.LeadingMarginSpan
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.luckyhan.studio.richeditor.util.DisplayUnitUtil
-import com.luckyhan.studio.richeditor.R
-import com.luckyhan.studio.richeditor.span.RichClickable
-import com.luckyhan.studio.richeditor.span.RichCopyable
-import com.luckyhan.studio.richeditor.span.RichSpan
+import com.luckyhan.studio.mokaeditor.util.MokaDisplayUnitUtil
+import com.luckyhan.studio.mokaeditor.R
+import com.luckyhan.studio.mokaeditor.span.MokaClickable
+import com.luckyhan.studio.mokaeditor.span.MokaCopyable
+import com.luckyhan.studio.mokaeditor.span.MokaSpan
 
-class RichCheckBoxSpan(
+class MokaCheckBoxSpan(
     private val context: Context,
     private val spannable: Spannable,
     var checked: Boolean = false,
     private val margin: Int = 100
-) : LeadingMarginSpan.Standard(margin), RichClickable, NoCopySpan, RichSpan {
+) : LeadingMarginSpan.Standard(margin), MokaClickable, NoCopySpan, MokaSpan {
 
-    var checkBoxSize = DisplayUnitUtil.getPxFromDp(context, 24f)
+    var checkBoxSize = MokaDisplayUnitUtil.getPxFromDp(context, 24f)
     var unCheckedDrawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_check_box_unchecked)
     var checkedDrawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_check_box_checked)
-    var paddingLeft = DisplayUnitUtil.getPxFromDp(context, 4f)
-    var paddingRight = DisplayUnitUtil.getPxFromDp(context, 4f)
+    var paddingLeft = MokaDisplayUnitUtil.getPxFromDp(context, 2f)
+    var paddingRight = MokaDisplayUnitUtil.getPxFromDp(context, 2f)
 
     override var clickableLeft: Int = 0
     override var clickableRight: Int = 0
@@ -39,15 +39,15 @@ class RichCheckBoxSpan(
         Log.d(this.javaClass.name, "onClicked")
         val spanStart = spannable.getSpanStart(this)
         val spanEnd = spannable.getSpanEnd(this)
-        val other = copy() as RichCheckBoxSpan
+        val other = copy() as MokaCheckBoxSpan
         other.checked = !checked
         spannable.removeSpan(this)
         spannable.setSpan(other, spanStart, spanEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
         if(other.checked){
-            val strikeThroughSpan = RichStrikeThroughParagraphSpan()
+            val strikeThroughSpan = MokaStrikeThroughParagraphSpan()
             spannable.setSpan(strikeThroughSpan, spanStart, spanEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
         }else{
-            val strikeThroughSpans = spannable.getSpans(spanStart, spanEnd, RichStrikeThroughParagraphSpan::class.java)
+            val strikeThroughSpans = spannable.getSpans(spanStart, spanEnd, MokaStrikeThroughParagraphSpan::class.java)
             if(strikeThroughSpans?.isNotEmpty() == true){
                 spannable.removeSpan(strikeThroughSpans[0])
             }
@@ -88,8 +88,8 @@ class RichCheckBoxSpan(
 
     }
 
-    override fun copy(): RichCopyable {
-        return RichCheckBoxSpan(context, spannable)
+    override fun copy(): MokaCopyable {
+        return MokaCheckBoxSpan(context, spannable)
     }
 
     override fun getOpeningTag(): String {

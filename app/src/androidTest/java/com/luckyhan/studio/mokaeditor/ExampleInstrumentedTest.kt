@@ -1,4 +1,4 @@
-package com.luckyhan.studio.richeditor
+package com.luckyhan.studio.mokaeditor
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

@@ -1,4 +1,4 @@
-package com.luckyhan.studio.richeditor
+package com.luckyhan.studio.mokaeditor
 
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
@@ -11,7 +11,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val editor = findViewById<RichEditText>(R.id.editor)
+        val editor = findViewById<MokaEditText>(R.id.editor)
 
         val bullet = findViewById<Button>(R.id.bullet)
         val checkbox = findViewById<Button>(R.id.checkbox)
@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        val spanTool = RichSpanTool(editor)
+        val spanTool = MokaSpanTool(editor)
 
         bullet.setOnClickListener{
             spanTool.toggleBullet()
@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         sizeSmall.setOnClickListener{
-            spanTool.setFontSize(0.5f)
+            spanTool.setFontSize(0.8f)
         }
         sizeNormal.setOnClickListener{
             spanTool.setFontSize(1.0f)
@@ -74,17 +74,17 @@ class MainActivity : AppCompatActivity() {
             spanTool.setForegroundColor(Color.RED)
         }
         fblack.setOnClickListener{
-            spanTool.setForegroundColor(Color.BLACK)
+            spanTool.setForegroundColor(editor.currentTextColor)
         }
 
         bblue.setOnClickListener{
-            spanTool.setBackgroundColor(Color.BLUE)
+            spanTool.setBackgroundColor(Color.parseColor("#800000ff"))
         }
         bred.setOnClickListener{
-            spanTool.setBackgroundColor(Color.RED)
+            spanTool.setBackgroundColor(Color.parseColor("#80ff0000"))
         }
         bwhite.setOnClickListener{
-            spanTool.setBackgroundColor(Color.WHITE)
+            spanTool.setBackgroundColor(Color.TRANSPARENT)
         }
 
 

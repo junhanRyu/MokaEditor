@@ -1,4 +1,4 @@
-package com.luckyhan.studio.richeditor
+package com.luckyhan.studio.mokaeditor
 
 import android.content.Context
 import android.text.*
@@ -10,13 +10,10 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import androidx.appcompat.widget.AppCompatEditText
-import com.luckyhan.studio.richeditor.span.RichClickable
-import com.luckyhan.studio.richeditor.span.character.RichBoldSpan
-import com.luckyhan.studio.richeditor.span.paragraph.RichCheckBoxSpan
-import com.luckyhan.studio.richeditor.span.paragraph.RichBulletSpan
+import com.luckyhan.studio.mokaeditor.span.MokaClickable
 import kotlin.math.roundToInt
 
-class RichEditText : AppCompatEditText {
+class MokaEditText : AppCompatEditText {
     var isTouched = false
     var selectionChangeListenr : RichSelectionChangeListener? = null
 
@@ -30,14 +27,14 @@ class RichEditText : AppCompatEditText {
     }
 
     private val textWatcher = object : TextWatcher {
-        var spanCollector: RichSpanCollector? = null
+        var spanCollector: MokaSpanCollector? = null
         var start: Int = 0
         var before: Int = 0
         var after: Int = 0
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
             if (s is Spannable) {
-                spanCollector = RichSpanCollector()
+                spanCollector = MokaSpanCollector()
                 spanCollector?.collect(s)
             }
         }
@@ -52,7 +49,7 @@ class RichEditText : AppCompatEditText {
             if (s is SpannableStringBuilder) {
                 Log.d(this.javaClass.name, "watcher depth ${s.textWatcherDepth}")
                 spanCollector?.let{
-                    val composer = RichSpanComposer()
+                    val composer = MokaSpanComposer()
                     composer.compose(s, it, start, before, after)
                 }
             }
@@ -126,13 +123,13 @@ class RichEditText : AppCompatEditText {
         }
     }
 
-    private fun getClickableSpans(x: Float, y: Float): List<RichClickable>? {
+    private fun getClickableSpans(x: Float, y: Float): List<MokaClickable>? {
         val positionFromTop: Int = scrollY + y.roundToInt() - totalPaddingTop
         val numberOfLine = layout.getLineForVertical(positionFromTop)
         val firstOfLine = layout.getLineStart(numberOfLine)
         val endOfLine = layout.getLineEnd(numberOfLine)
 
-        val spans = text?.getSpans(firstOfLine, endOfLine, RichClickable::class.java)
+        val spans = text?.getSpans(firstOfLine, endOfLine, MokaClickable::class.java)
         return spans?.filter {
             val posX = x.roundToInt() - totalPaddingLeft
             val posY = y.roundToInt() - totalPaddingTop

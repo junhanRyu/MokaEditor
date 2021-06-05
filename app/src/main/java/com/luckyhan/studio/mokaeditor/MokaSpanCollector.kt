@@ -1,18 +1,17 @@
-package com.luckyhan.studio.richeditor
+package com.luckyhan.studio.mokaeditor
 
 import android.text.Spannable
-import com.luckyhan.studio.richeditor.span.RichSpan
-import kotlin.reflect.KClass
+import com.luckyhan.studio.mokaeditor.span.MokaSpan
 
-class RichSpanCollector {
+class MokaSpanCollector {
     private val spans : ArrayList<RichSpanModel> = ArrayList()
     private var text : String = ""
 
-    data class RichSpanModel(val span : RichSpan, val start : Int, val end : Int, val flag : Int)
+    data class RichSpanModel(val span : MokaSpan, val start : Int, val end : Int, val flag : Int)
 
     fun collect(spannable : Spannable){
         text = spannable.toString()
-        val spans = spannable.getSpans(0, spannable.length, RichSpan::class.java)
+        val spans = spannable.getSpans(0, spannable.length, MokaSpan::class.java)
         spans.forEach {
             val span = RichSpanModel(it, spannable.getSpanStart(it), spannable.getSpanEnd(it), spannable.getSpanFlags(it))
             this.spans.add(span)

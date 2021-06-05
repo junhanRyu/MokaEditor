@@ -1,6 +1,6 @@
-package com.luckyhan.studio.richeditor.span
+package com.luckyhan.studio.mokaeditor.span
 
-interface RichClickable {
+interface MokaClickable {
     var clickableLeft : Int
     var clickableRight : Int
     var clickableTop : Int

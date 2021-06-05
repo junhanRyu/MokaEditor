@@ -1,4 +1,4 @@
-package com.luckyhan.studio.richeditor
+package com.luckyhan.studio.mokaeditor
 
 import org.junit.Test
 

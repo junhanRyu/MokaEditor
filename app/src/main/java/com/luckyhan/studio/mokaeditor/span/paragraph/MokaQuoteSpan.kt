@@ -1,12 +1,12 @@
-package com.luckyhan.studio.richeditor.span.paragraph
+package com.luckyhan.studio.mokaeditor.span.paragraph
 
 import android.graphics.Color
 import android.os.Parcel
 import android.text.NoCopySpan
 import android.text.style.QuoteSpan
-import com.luckyhan.studio.richeditor.span.RichSpan
+import com.luckyhan.studio.mokaeditor.span.MokaSpan
 
-class RichQuoteSpan(
+class MokaQuoteSpan(
     private val mColor : Int = Color.GREEN,
     private val mStripeWidth : Int = 20,
     private val mGapWidth : Int = 40)
@@ -15,9 +15,9 @@ class RichQuoteSpan(
     writeInt(mStripeWidth)
     writeInt(mGapWidth)
     setDataPosition(0)
-}), RichSpan, NoCopySpan {
-    override fun copy(): RichSpan {
-        return RichQuoteSpan()
+}), MokaSpan, NoCopySpan {
+    override fun copy(): MokaSpan {
+        return MokaQuoteSpan()
     }
 
     override fun getOpeningTag(): String {

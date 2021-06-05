@@ -1,6 +1,6 @@
-package com.luckyhan.studio.richeditor.util
+package com.luckyhan.studio.mokaeditor.util
 
-object RichTextUtil {
+object MokaTextUtil {
 
     fun getStartOfLine(text: String, offset: Int): Int {
         if (offset < 0 || offset > text.length)
