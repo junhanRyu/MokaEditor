@@ -15,14 +15,16 @@ class MainActivity : AppCompatActivity() {
         val checkbox = findViewById<Button>(R.id.checkbox)
         val bold = findViewById<Button>(R.id.bold)
 
+        val spanTool = RichSpanTool(editor)
+
         bullet.setOnClickListener{
-            editor.toggleBullet()
+            spanTool.toggleBullet()
         }
         checkbox.setOnClickListener{
-            editor.toggleCheckBox()
+            spanTool.toggleCheckBox()
         }
         bold.setOnClickListener{
-            editor.toggleBold()
+            spanTool.toggleBold()
         }
     }
 

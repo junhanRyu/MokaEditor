@@ -5,6 +5,7 @@ import android.text.SpannableStringBuilder
 import android.text.style.ParagraphStyle
 import android.util.Log
 import com.luckyhan.studio.richeditor.span.RichSpan
+import com.luckyhan.studio.richeditor.util.RichTextUtil
 
 class RichSpanComposer {
     fun compose(dest: SpannableStringBuilder, src: RichSpanCollector, start: Int, before: Int, after: Int) {
@@ -26,8 +27,8 @@ class RichSpanComposer {
             Log.d("RichSpanComposer", "ss : $spanStart, se : $spanEnd")
             if (beforeStart in spanStart..spanEnd) {
                 if (span is ParagraphStyle) {
-                    val lineStart = RichTextUtils.getStartOfLine(dest.toString(), spanStart)
-                    val lineEnd = RichTextUtils.getEndOfLine(dest.toString(), spanStart)
+                    val lineStart = RichTextUtil.getStartOfLine(dest.toString(), spanStart)
+                    val lineEnd = RichTextUtil.getEndOfLine(dest.toString(), spanStart)
                     if(beforeStart <= spanStart && gap < 0){
                         //remove
                     }else{
@@ -57,16 +58,16 @@ class RichSpanComposer {
                 }
             } else if (beforeStart < spanStart && beforeEnd <= spanStart) {
                 if (span is ParagraphStyle) {
-                    val lineStart = RichTextUtils.getStartOfLine(dest.toString(), spanStart+gap)
-                    val lineEnd = RichTextUtils.getEndOfLine(dest.toString(), spanStart+gap)
+                    val lineStart = RichTextUtil.getStartOfLine(dest.toString(), spanStart+gap)
+                    val lineEnd = RichTextUtil.getEndOfLine(dest.toString(), spanStart+gap)
                     dest.setSpan(span, lineStart, lineEnd, flag)
                 } else {
                     dest.setSpan(span, spanStart + gap, spanEnd + gap, flag)
                 }
             } else if (beforeStart > spanEnd) {
                 if (span is ParagraphStyle) {
-                    val lineStart = RichTextUtils.getStartOfLine(dest.toString(), spanStart)
-                    val lineEnd = RichTextUtils.getEndOfLine(dest.toString(), spanStart)
+                    val lineStart = RichTextUtil.getStartOfLine(dest.toString(), spanStart)
+                    val lineEnd = RichTextUtil.getEndOfLine(dest.toString(), spanStart)
                     dest.setSpan(span, lineStart, lineEnd, flag)
                 } else {
                     dest.setSpan(span, spanStart, spanEnd, flag)

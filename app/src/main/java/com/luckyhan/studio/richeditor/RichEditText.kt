@@ -18,6 +18,16 @@ import kotlin.math.roundToInt
 
 class RichEditText : AppCompatEditText {
     var isTouched = false
+    var selectionChangeListenr : RichSelectionChangeListener? = null
+
+    interface RichSelectionChangeListener{
+        fun onSelectionChanged()
+    }
+
+    override fun onSelectionChanged(selStart: Int, selEnd: Int) {
+        super.onSelectionChanged(selStart, selEnd)
+        selectionChangeListenr?.onSelectionChanged()
+    }
 
     private val textWatcher = object : TextWatcher {
         var spanCollector: RichSpanCollector? = null
@@ -48,6 +58,7 @@ class RichEditText : AppCompatEditText {
             }
         }
     }
+
 
     private inner class RichEditorInputConnection(target: InputConnection, mutable: Boolean) :
         InputConnectionWrapper(target, mutable) {
@@ -84,39 +95,7 @@ class RichEditText : AppCompatEditText {
         return RichEditorInputConnection(super.onCreateInputConnection(outAttrs), true)
     }
 
-    fun toggleBold() {
-        val spanTool = RichSpanTool(this)
-        val isBold = spanTool.isThereSpan(RichBoldSpan::class.java)
-        if(isBold){
-            spanTool.removeCharacterSpan(RichBoldSpan::class.java)
-        }else{
-            val span = RichBoldSpan()
-            spanTool.addCharacterSpan(span)
-        }
-    }
 
-    fun toggleBullet() {
-        val spanTool = RichSpanTool(this)
-        val isBullet = spanTool.isThereSpan(RichBulletSpan::class.java)
-        if(isBullet){
-            spanTool.removeParagraphSpan(RichBulletSpan::class.java)
-        }else{
-            val span = RichBulletSpan()
-            spanTool.addParagraphSpan(span)
-        }
-    }
-
-    fun toggleCheckBox() {
-        val spanTool = RichSpanTool(this)
-        val isCheckBox = spanTool.isThereSpan(RichCheckBoxSpan::class.java)
-        if(isCheckBox){
-            spanTool.removeParagraphSpan(RichCheckBoxSpan::class.java)
-        }else{
-            val spannable = this.text as Spannable
-            val span = RichCheckBoxSpan(context, spannable)
-            spanTool.addParagraphSpan(span)
-        }
-    }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         when (event?.action) {

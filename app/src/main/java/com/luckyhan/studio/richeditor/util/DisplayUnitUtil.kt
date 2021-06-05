@@ -1,4 +1,4 @@
-package com.luckyhan.studio.richeditor
+package com.luckyhan.studio.richeditor.util
 
 import android.content.Context
 import android.util.TypedValue

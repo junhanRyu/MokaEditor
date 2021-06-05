@@ -11,7 +11,7 @@ import android.text.Spanned
 import android.text.style.LeadingMarginSpan
 import android.util.Log
 import androidx.core.content.ContextCompat
-import com.luckyhan.studio.richeditor.DisplayUnitUtil
+import com.luckyhan.studio.richeditor.util.DisplayUnitUtil
 import com.luckyhan.studio.richeditor.R
 import com.luckyhan.studio.richeditor.span.RichClickable
 import com.luckyhan.studio.richeditor.span.RichCopyable

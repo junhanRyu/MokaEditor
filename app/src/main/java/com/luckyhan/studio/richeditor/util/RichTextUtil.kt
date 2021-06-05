@@ -1,6 +1,6 @@
-package com.luckyhan.studio.richeditor
+package com.luckyhan.studio.richeditor.util
 
-object RichTextUtils {
+object RichTextUtil {
 
     fun getStartOfLine(text: String, offset: Int): Int {
         if (offset < 0 || offset > text.length)
