@@ -44,10 +44,10 @@ class RichCheckBoxSpan(
         spannable.removeSpan(this)
         spannable.setSpan(other, spanStart, spanEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
         if(other.checked){
-            val strikeThroughSpan = RichStrikeThroughSpan()
+            val strikeThroughSpan = RichStrikeThroughParagraphSpan()
             spannable.setSpan(strikeThroughSpan, spanStart, spanEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
         }else{
-            val strikeThroughSpans = spannable.getSpans(spanStart, spanEnd, RichStrikeThroughSpan::class.java)
+            val strikeThroughSpans = spannable.getSpans(spanStart, spanEnd, RichStrikeThroughParagraphSpan::class.java)
             if(strikeThroughSpans?.isNotEmpty() == true){
                 spannable.removeSpan(strikeThroughSpans[0])
             }

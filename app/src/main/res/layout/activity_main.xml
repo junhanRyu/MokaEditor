@@ -22,31 +22,125 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <LinearLayout
+        <GridLayout
             android:id="@+id/buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:columnCount="3"
             app:layout_constraintBottom_toBottomOf="parent">
 
             <Button
                 android:id="@+id/bullet"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
                 android:text="Bullet"/>
             <Button
                 android:id="@+id/checkbox"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
                 android:text="Checkbox"/>
             <Button
+                android:id="@+id/quote"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="Quote"/>
+            <Button
                 android:id="@+id/bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
                 android:text="Bold"/>
+            <Button
+                android:id="@+id/underline"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="Underline"/>
+            <Button
+                android:id="@+id/strikethrough"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="strikethrough"/>
+            <Button
+                android:id="@+id/sizeSmall"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="Small"/>
+            <Button
+                android:id="@+id/sizeNormal"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="Normal"/>
+            <Button
+                android:id="@+id/sizeLarge"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="Large"/>
+            <Button
+                android:id="@+id/fblue"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="f_blue"/>
+            <Button
+                android:id="@+id/fblack"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="f_black"/>
+            <Button
+                android:id="@+id/fred"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="f_red"/>
+            <Button
+                android:id="@+id/b_blue"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="b_blue"/>
+            <Button
+                android:id="@+id/b_white"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="b_white"/>
+            <Button
+                android:id="@+id/b_red"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="b_red"/>
 
 
-        </LinearLayout>
+
+        </GridLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

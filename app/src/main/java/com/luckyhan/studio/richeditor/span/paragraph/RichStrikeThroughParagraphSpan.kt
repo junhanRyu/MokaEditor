@@ -6,12 +6,12 @@ import android.text.style.StrikethroughSpan
 import com.luckyhan.studio.richeditor.span.RichCopyable
 import com.luckyhan.studio.richeditor.span.RichSpan
 
-class RichStrikeThroughSpan : StrikethroughSpan(), RichSpan, NoCopySpan, ParagraphStyle {
+class RichStrikeThroughParagraphSpan : StrikethroughSpan(), RichSpan, NoCopySpan, ParagraphStyle {
     override fun copy(): RichCopyable {
-        return RichStrikeThroughSpan()
+        return RichStrikeThroughParagraphSpan()
     }
 
     override fun getOpeningTag(): String {
-        return "<annotation type=\"strikethrough\">"
+        return "<annotation type=\"strikethrough_paragraph\">"
     }
 }
