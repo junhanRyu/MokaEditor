@@ -1,2 +1,3 @@
-include ':app'
-rootProject.name = "RichEditor"
+include ':library'
+rootProject.name = "MokaEditor"
+include ':sample'
