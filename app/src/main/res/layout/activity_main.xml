@@ -31,6 +31,21 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
             <Button
+                android:id="@+id/undo"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="undo"/>
+            <Button
+                android:id="@+id/redo"
+                android:layout_width="100dp"
+                android:layout_height="50dp"
+                android:layout_margin="5dp"
+                android:textSize="10dp"
+                android:text="redo"/>
+
+            <Button
                 android:id="@+id/bullet"
                 android:layout_width="100dp"
                 android:layout_height="50dp"

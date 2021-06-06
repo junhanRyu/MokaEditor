@@ -9,7 +9,7 @@ class MokaFontSizeSpan(val proportion : Float) : RelativeSizeSpan(proportion), M
         return MokaFontSizeSpan(proportion)
     }
 
-    override fun getOpeningTag(): String {
-        return "<annotation type=\"fontsize\" size=\"$proportion\">"
+    override fun getSpanTypeName(): String {
+        return "fontsize"
     }
 }

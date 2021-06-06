@@ -9,7 +9,7 @@ class MokaForegroundColorSpan(val color : Int) : ForegroundColorSpan(color), Mok
         return MokaForegroundColorSpan(color)
     }
 
-    override fun getOpeningTag(): String {
-        return "<annotation type=\"foregroundcolor\" color=\"$color\">"
+    override fun getSpanTypeName(): String {
+        return "foregroundcolor"
     }
 }

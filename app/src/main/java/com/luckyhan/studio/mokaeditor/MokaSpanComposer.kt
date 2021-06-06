@@ -14,17 +14,14 @@ class MokaSpanComposer {
         val afterStart = start
         val afterEnd = afterStart + after
         val gap = after - before
-        Log.d("RichSpanComposer", "bs : $beforeStart, be : $beforeEnd")
-        Log.d("RichSpanComposer", "as : $afterStart, ae : $afterEnd")
 
-        val beforeText = src.getText()
+        val beforeText = src.text
         val spans = src.getSpans(0, beforeText.length, MokaSpan::class.java)
         spans.forEach { spanModel ->
             val spanStart = spanModel.start
             val spanEnd = spanModel.end
             val flag = spanModel.flag
             val span = spanModel.span
-            Log.d("RichSpanComposer", "ss : $spanStart, se : $spanEnd")
             if (beforeStart in spanStart..spanEnd) {
                 if (span is ParagraphStyle) {
                     val lineStart = MokaTextUtil.getStartOfLine(dest.toString(), spanStart)

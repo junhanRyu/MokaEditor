@@ -16,8 +16,8 @@ class MokaBulletSpan(private val mGapWidth : Int = 40, private val mColor : Int 
         return MokaBulletSpan()
     }
 
-    override fun getOpeningTag(): String {
-        return "<annotation type=\"bullet\">"
+    override fun getSpanTypeName(): String {
+        return "bullet"
     }
 
 }

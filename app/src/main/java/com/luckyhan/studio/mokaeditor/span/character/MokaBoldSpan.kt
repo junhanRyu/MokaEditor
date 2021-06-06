@@ -9,8 +9,7 @@ class MokaBoldSpan : StyleSpan(Typeface.BOLD), MokaSpan, NoCopySpan {
     override fun copy(): MokaSpan {
         return MokaBoldSpan()
     }
-
-    override fun getOpeningTag(): String {
-        return "<annotation type=\"bold\">"
+    override fun getSpanTypeName(): String {
+        return "bold"
     }
 }

@@ -9,7 +9,7 @@ class MokaUnderlineSpan : UnderlineSpan(), MokaSpan, NoCopySpan {
         return MokaUnderlineSpan()
     }
 
-    override fun getOpeningTag(): String {
-        return "<annotation type=\"underline\">"
+    override fun getSpanTypeName(): String {
+        return "underline"
     }
 }

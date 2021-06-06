@@ -92,7 +92,7 @@ class MokaCheckBoxSpan(
         return MokaCheckBoxSpan(context, spannable)
     }
 
-    override fun getOpeningTag(): String {
-        return "<annotation type=\"checkbox\" checked=\"$checked\">"
+    override fun getSpanTypeName(): String {
+        return "checkbox"
     }
 }

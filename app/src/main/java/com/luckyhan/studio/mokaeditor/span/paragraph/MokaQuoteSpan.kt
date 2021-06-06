@@ -20,8 +20,7 @@ class MokaQuoteSpan(
         return MokaQuoteSpan()
     }
 
-    override fun getOpeningTag(): String {
-        return "<annotation type=\"quote\">"
+    override fun getSpanTypeName(): String {
+        return "quote"
     }
-
 }

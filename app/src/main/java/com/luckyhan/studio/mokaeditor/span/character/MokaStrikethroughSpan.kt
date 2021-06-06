@@ -9,7 +9,7 @@ class MokaStrikethroughSpan : StrikethroughSpan(), MokaSpan, NoCopySpan {
         return MokaStrikethroughSpan()
     }
 
-    override fun getOpeningTag(): String {
-        return "<annotation type=\"strikethrough\">"
+    override fun getSpanTypeName(): String {
+        return "strikethrough"
     }
 }

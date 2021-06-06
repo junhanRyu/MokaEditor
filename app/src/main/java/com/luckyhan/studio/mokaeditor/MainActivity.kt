@@ -3,6 +3,9 @@ package com.luckyhan.studio.mokaeditor
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.UnderlineSpan
 import android.widget.Button
 
 class MainActivity : AppCompatActivity() {
@@ -12,6 +15,10 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         val editor = findViewById<MokaEditText>(R.id.editor)
+
+        val spannable = SpannableStringBuilder("hello world")
+        //spannable.setSpan(UnderlineSpan(), 0, 5, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        //editor.setText(spannable)
 
         val bullet = findViewById<Button>(R.id.bullet)
         val checkbox = findViewById<Button>(R.id.checkbox)
@@ -33,9 +40,18 @@ class MainActivity : AppCompatActivity() {
         val bwhite = findViewById<Button>(R.id.b_white)
         val bred = findViewById<Button>(R.id.b_red)
 
+        val undo = findViewById<Button>(R.id.undo)
+        val redo = findViewById<Button>(R.id.redo)
 
 
         val spanTool = MokaSpanTool(editor)
+
+        undo.setOnClickListener{
+            spanTool.undo()
+        }
+        redo.setOnClickListener{
+            spanTool.redo()
+        }
 
         bullet.setOnClickListener{
             spanTool.toggleBullet()

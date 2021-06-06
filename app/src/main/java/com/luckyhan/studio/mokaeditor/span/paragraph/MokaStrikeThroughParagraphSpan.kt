@@ -11,7 +11,7 @@ class MokaStrikeThroughParagraphSpan : StrikethroughSpan(), MokaSpan, NoCopySpan
         return MokaStrikeThroughParagraphSpan()
     }
 
-    override fun getOpeningTag(): String {
-        return "<annotation type=\"strikethrough_paragraph\">"
+    override fun getSpanTypeName(): String {
+        return "strikethrough_paragraph"
     }
 }

@@ -14,11 +14,18 @@ import com.luckyhan.studio.mokaeditor.span.MokaClickable
 import kotlin.math.roundToInt
 
 class MokaEditText : AppCompatEditText {
-    var isTouched = false
-    var selectionChangeListenr : RichSelectionChangeListener? = null
+    var selectionChangeListenr : SelectionChangeListener? = null
+    var textChangeListener : TextChangeListener? = null
+    var textWatcherEnabled = true
+    private val textWatcher = MokaTextWatcher()
+    private val CLICK_THRESHOLD = 100
 
-    interface RichSelectionChangeListener{
+    interface SelectionChangeListener{
         fun onSelectionChanged()
+    }
+
+    interface TextChangeListener{
+        fun onTextChanged()
     }
 
     override fun onSelectionChanged(selStart: Int, selEnd: Int) {
@@ -26,53 +33,43 @@ class MokaEditText : AppCompatEditText {
         selectionChangeListenr?.onSelectionChanged()
     }
 
-    private val textWatcher = object : TextWatcher {
+    inner class MokaTextWatcher : TextWatcher {
         var spanCollector: MokaSpanCollector? = null
         var start: Int = 0
         var before: Int = 0
         var after: Int = 0
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            if (s is Spannable) {
-                spanCollector = MokaSpanCollector()
-                spanCollector?.collect(s)
+            if(textWatcherEnabled){
+                if (s is Spannable) {
+                    spanCollector = MokaSpanCollector()
+                    spanCollector?.collect(s)
+                }
             }
         }
 
         override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-            this.start = start
-            this.after = count
-            this.before = before
+            if(textWatcherEnabled) {
+                this.start = start
+                this.after = count
+                this.before = before
+            }
         }
 
         override fun afterTextChanged(s: Editable?) {
-            if (s is SpannableStringBuilder) {
-                Log.d(this.javaClass.name, "watcher depth ${s.textWatcherDepth}")
-                spanCollector?.let{
-                    val composer = MokaSpanComposer()
-                    composer.compose(s, it, start, before, after)
-                }
-            }
-        }
-    }
-
-
-    private inner class RichEditorInputConnection(target: InputConnection, mutable: Boolean) :
-        InputConnectionWrapper(target, mutable) {
-        override fun sendKeyEvent(event: KeyEvent?): Boolean {
-            event?.let {
-                if (event.action == KeyEvent.ACTION_DOWN) {
-                    when (event.keyCode) {
-                        KeyEvent.KEYCODE_DEL -> {
-                        }
-                        KeyEvent.KEYCODE_ENTER -> {
-                        }
+            if(textWatcherEnabled) {
+                if (s is SpannableStringBuilder) {
+                    Log.d(this.javaClass.name, "watcher depth ${s.textWatcherDepth}")
+                    spanCollector?.let {
+                        val composer = MokaSpanComposer()
+                        composer.compose(s, it, start, before, after)
                     }
                 }
+                textChangeListener?.onTextChanged()
             }
-            return super.sendKeyEvent(event)
         }
     }
+
 
     init {
         addTextChangedListener(textWatcher)
@@ -84,43 +81,43 @@ class MokaEditText : AppCompatEditText {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
     }
 
-    override fun isSuggestionsEnabled(): Boolean {
+    /*override fun isSuggestionsEnabled(): Boolean {
         return false
+    }*/
+
+    override fun performClick(): Boolean {
+        return super.performClick()
     }
-
-    override fun onCreateInputConnection(outAttrs: EditorInfo?): InputConnection {
-        return RichEditorInputConnection(super.onCreateInputConnection(outAttrs), true)
-    }
-
-
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        when (event?.action) {
-            MotionEvent.ACTION_UP -> {
-                if (isTouched) {
-                    isTouched = false
-                    val clickableSpans = getClickableSpans(event.x, event.y)
-                    if (clickableSpans?.isNotEmpty() == true){
-                        clickableSpans.forEach{
-                            it.onClicked()
+        event?.let {
+            val duration = (event.eventTime) - (event.downTime)
+            when (event.action) {
+                MotionEvent.ACTION_UP -> {
+                    if (duration < CLICK_THRESHOLD) {
+                        val clickableSpans = getClickableSpans(event.x, event.y)
+                        if (clickableSpans?.isNotEmpty() == true) {
+                            clickableSpans.forEach {
+                                it.onClicked()
+                            }
+                            return true
                         }
-                        return true
                     }
+                    return super.onTouchEvent(event)
                 }
-                return super.onTouchEvent(event)
-            }
-            MotionEvent.ACTION_DOWN -> {
-                isTouched = true
-                val clickableSpans = getClickableSpans(event.x, event.y)
-                return if (clickableSpans?.isNotEmpty() == true)
-                    true
-                else
-                    super.onTouchEvent(event)
-            }
-            else -> {
-                return super.onTouchEvent(event)
+                MotionEvent.ACTION_DOWN -> {
+                    val clickableSpans = getClickableSpans(event.x, event.y)
+                    return if (clickableSpans?.isNotEmpty() == true)
+                        true
+                    else
+                        super.onTouchEvent(event)
+                }
+                else -> {
+                    return super.onTouchEvent(event)
+                }
             }
         }
+        return super.onTouchEvent(event)
     }
 
     private fun getClickableSpans(x: Float, y: Float): List<MokaClickable>? {
