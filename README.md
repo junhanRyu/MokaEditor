@@ -1,20 +1,24 @@
 # MokaEditor
 Android Native Rich Editor Project
 
-features :
-bold
-underline
-strikethrough
-fontsize
-foregroundcolor
-backgroundcolor
-checkbox
-quote
-bullet
-clickable
+**features**  
+* bold  
+* underline  
+* strikethrough  
+* fontsize  
+* foregroundcolor  
+* backgroundcolor  
+* checkbox  
+* quote  
+* bullet  
+* clickable  
+* redo  
+* undo  
 
 
-Add it in your root build.gradle at the end of repositories:
+**How to**  
+
+Step 1. Add it in your root build.gradle at the end of repositories:
 
 	allprojects {
 		repositories {
