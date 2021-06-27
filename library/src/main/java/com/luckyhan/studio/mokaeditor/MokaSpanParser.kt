@@ -3,15 +3,10 @@ package com.luckyhan.studio.mokaeditor
 import android.text.Spannable
 import android.util.Log
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
-import com.luckyhan.studio.mokaeditor.span.character.*
-import com.luckyhan.studio.mokaeditor.span.paragraph.MokaBulletSpan
-import com.luckyhan.studio.mokaeditor.span.paragraph.MokaCheckBoxSpan
-import com.luckyhan.studio.mokaeditor.span.paragraph.MokaQuoteSpan
-import com.luckyhan.studio.mokaeditor.span.paragraph.MokaStrikeThroughParagraphSpan
 import org.json.JSONArray
 import org.json.JSONObject
 
-class MokaSpanParser {
+abstract class MokaSpanParser {
 
     fun getString(spannable: Spannable): String {
         val spans = spannable.getSpans(0, spannable.length, MokaSpan::class.java)
@@ -27,87 +22,13 @@ class MokaSpanParser {
             spanJson.put("start", start)
             spanJson.put("end", end)
             spanJson.put("flag", flag)
-            spanJson.put("name", it.getSpanTypeName())
-            when (it) {
-                is MokaCheckBoxSpan -> {
-                    spanJson.put("checked", it.checked)
-                }
-                is MokaFontSizeSpan -> {
-                    spanJson.put("proportion", it.proportion.toDouble())
-                }
-                is MokaForegroundColorSpan -> {
-                    spanJson.put("color", it.color)
-                }
-                is MokaBackgroundColorSpan -> {
-                    spanJson.put("color", it.color)
-                }
-            }
+            spanJson.put("name", it.javaClass.name)
+            it.writeToJson(spanJson)
             jsonArray.put(spanJson)
         }
         json.put("spans", jsonArray)
-
-        Log.d(this.javaClass.name, json.toString())
-
         return json.toString()
     }
-
-    // TextView.setText dose not apply NoCopySpan.
-    // deprecated.
-    /*fun parseString(text: String): SpannableStringBuilder {
-        val json = JSONObject(text)
-        val rawText = json.getString("text")
-        val spanArray = json.getJSONArray("spans")
-        val spannable = SpannableStringBuilder(rawText)
-        for (index in 0 until spanArray.length()) {
-            val spanJson = spanArray.getJSONObject(index)
-            val start = spanJson.getInt("start")
-            val end = spanJson.getInt("end")
-            val flag = spanJson.getInt("flag")
-            val name = spanJson.getString("name")
-
-            val span = when (name) {
-                "checkbox" -> {
-                    val checked = spanJson.getBoolean("checked")
-                    MokaCheckBoxSpan(context , spannable, checked)
-                }
-                "quote" -> {
-                    MokaQuoteSpan()
-                }
-                "strikethrough_paragraph" -> {
-                    MokaStrikeThroughParagraphSpan()
-                }
-                "bullet" -> {
-                    MokaBulletSpan()
-                }
-                "underline" -> {
-                    MokaUnderlineSpan()
-                }
-                "bold" -> {
-                    MokaBoldSpan()
-                }
-                "strikethrough" -> {
-                    MokaStrikethroughSpan()
-                }
-                "fontsize" -> {
-                    val proportion = spanJson.getDouble("proportion")
-                    MokaFontSizeSpan(proportion.toFloat())
-                }
-                "foregroundcolor" -> {
-                    val color = spanJson.getInt("color")
-                    MokaForegroundColorSpan(color)
-                }
-                "backgroundcolor" -> {
-                    val color = spanJson.getInt("color")
-                    MokaBackgroundColorSpan(color)
-                }
-                else->{
-                    throw Exception("Not supported span!")
-                }
-            }
-            spannable.setSpan(span, start, end, flag)
-        }
-        return spannable
-    }*/
 
     fun getRawText(source : String) : String{
         val json = JSONObject(source)
@@ -115,7 +36,10 @@ class MokaSpanParser {
         return rawText
     }
 
+    abstract fun createSpan(sourceJson : JSONObject, dest : MokaEditText) : MokaSpan
+
     fun parseString(dest: MokaEditText, source : String){
+        Log.d("MokaSpanParser", source)
         val json = JSONObject(source)
         val spanArray = json.getJSONArray("spans")
         for (index in 0 until spanArray.length()) {
@@ -123,47 +47,7 @@ class MokaSpanParser {
             val start = spanJson.getInt("start")
             val end = spanJson.getInt("end")
             val flag = spanJson.getInt("flag")
-            val name = spanJson.getString("name")
-
-            val span = when (name) {
-                "checkbox" -> {
-                    val checked = spanJson.getBoolean("checked")
-                    MokaCheckBoxSpan(dest, checked)
-                }
-                "quote" -> {
-                    MokaQuoteSpan()
-                }
-                "strikethrough_paragraph" -> {
-                    MokaStrikeThroughParagraphSpan()
-                }
-                "bullet" -> {
-                    MokaBulletSpan()
-                }
-                "underline" -> {
-                    MokaUnderlineSpan()
-                }
-                "bold" -> {
-                    MokaBoldSpan()
-                }
-                "strikethrough" -> {
-                    MokaStrikethroughSpan()
-                }
-                "fontsize" -> {
-                    val proportion = spanJson.getDouble("proportion")
-                    MokaFontSizeSpan(proportion.toFloat())
-                }
-                "foregroundcolor" -> {
-                    val color = spanJson.getInt("color")
-                    MokaForegroundColorSpan(color)
-                }
-                "backgroundcolor" -> {
-                    val color = spanJson.getInt("color")
-                    MokaBackgroundColorSpan(color)
-                }
-                else->{
-                    throw Exception("Not supported span!")
-                }
-            }
+            val span = createSpan(spanJson, dest)
             dest.text?.setSpan(span, start, end, flag)
         }
     }

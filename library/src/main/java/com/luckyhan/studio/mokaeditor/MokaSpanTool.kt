@@ -9,7 +9,7 @@ import com.luckyhan.studio.mokaeditor.util.MokaTextUtil
 import java.lang.NullPointerException
 import java.lang.UnsupportedOperationException
 
-class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionChangeListener, MokaEditText.TextChangeListener {
+class MokaSpanTool(private val editText: MokaEditText, private val parser : MokaSpanParser) : MokaEditText.SelectionChangeListener, MokaEditText.TextChangeListener {
 
     private val spannable: Spannable
         get() {
@@ -55,7 +55,6 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
         editText.selectionChangeListenr = this
         editText.textChangeListener = this
 
-        val parser = MokaSpanParser()
         val currentText = parser.getString(spannable)
         redoUndoStack.add(currentText)
         stackCursor = 0
@@ -97,7 +96,6 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
             redoable = true
         }
         toolStateChangeListener?.onToolsStateChanged()
-        val parser = MokaSpanParser()
         Log.d(this.javaClass.name, parser.getString(spannable))
     }
 
@@ -328,7 +326,6 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
     }
 
     override fun onTextChanged() {
-        val parser = MokaSpanParser()
         val current = parser.getString(spannable)
         while (stackCursor != redoUndoStack.size - 1) {
             redoUndoStack.removeAt(redoUndoStack.size - 1)
@@ -354,7 +351,6 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
     }
 
     private fun setSpansFromJson(jsonString : String){
-        val parser = MokaSpanParser()
         val rawText = parser.getRawText(jsonString)
         editText.textWatcherEnabled = false
         editText.setText(rawText)

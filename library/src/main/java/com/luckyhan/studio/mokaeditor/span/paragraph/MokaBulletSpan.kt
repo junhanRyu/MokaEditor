@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.text.NoCopySpan
 import android.text.style.BulletSpan
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
+import org.json.JSONObject
 
 class MokaBulletSpan(private val mGapWidth : Int = 40, private val mColor : Int = 0, private val mRadius : Int = 8) : BulletSpan(Parcel.obtain().apply {
     writeInt(mGapWidth)
@@ -18,6 +19,10 @@ class MokaBulletSpan(private val mGapWidth : Int = 40, private val mColor : Int 
 
     override fun getSpanTypeName(): String {
         return "bullet"
+    }
+
+    override fun writeToJson(json: JSONObject) {
+        return
     }
 
 }

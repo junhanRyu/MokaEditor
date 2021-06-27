@@ -4,6 +4,7 @@ import android.graphics.Typeface
 import android.text.NoCopySpan
 import android.text.style.StyleSpan
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
+import org.json.JSONObject
 
 class MokaBoldSpan : StyleSpan(Typeface.BOLD), MokaSpan, NoCopySpan {
     override fun copy(): MokaSpan {
@@ -11,5 +12,9 @@ class MokaBoldSpan : StyleSpan(Typeface.BOLD), MokaSpan, NoCopySpan {
     }
     override fun getSpanTypeName(): String {
         return "bold"
+    }
+
+    override fun writeToJson(json: JSONObject) {
+        return
     }
 }

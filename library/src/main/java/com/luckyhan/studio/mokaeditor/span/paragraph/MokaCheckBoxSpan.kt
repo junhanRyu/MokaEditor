@@ -18,6 +18,7 @@ import com.luckyhan.studio.mokaeditor.R
 import com.luckyhan.studio.mokaeditor.span.MokaClickable
 import com.luckyhan.studio.mokaeditor.span.MokaCopyable
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
+import org.json.JSONObject
 import java.lang.UnsupportedOperationException
 
 class MokaCheckBoxSpan(
@@ -98,5 +99,9 @@ class MokaCheckBoxSpan(
 
     override fun getSpanTypeName(): String {
         return "checkbox"
+    }
+
+    override fun writeToJson(json: JSONObject) {
+        json.put("checked", checked)
     }
 }

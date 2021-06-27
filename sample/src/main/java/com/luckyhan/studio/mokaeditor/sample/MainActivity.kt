@@ -4,6 +4,7 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
+import com.luckyhan.studio.mokaeditor.DefaultMokaSpanParser
 import com.luckyhan.studio.mokaeditor.MokaEditText
 import com.luckyhan.studio.mokaeditor.MokaSpanTool
 import com.luckyhan.studio.mokaeditor.span.character.*
@@ -42,7 +43,8 @@ class MainActivity : AppCompatActivity() {
         val redo = findViewById<Button>(R.id.redo)
 
 
-        val spanTool = MokaSpanTool(editor)
+        val parser = DefaultMokaSpanParser()
+        val spanTool = MokaSpanTool(editor, parser)
 
         undo.setOnClickListener{
             spanTool.undo()
