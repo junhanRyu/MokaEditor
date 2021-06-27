@@ -81,14 +81,6 @@ class MokaEditText : AppCompatEditText {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
     }
 
-    /*override fun isSuggestionsEnabled(): Boolean {
-        return false
-    }*/
-
-    override fun performClick(): Boolean {
-        return super.performClick()
-    }
-
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         event?.let {
             val duration = (event.eventTime) - (event.downTime)

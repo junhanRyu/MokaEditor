@@ -6,6 +6,10 @@ import android.os.Bundle
 import android.widget.Button
 import com.luckyhan.studio.mokaeditor.MokaEditText
 import com.luckyhan.studio.mokaeditor.MokaSpanTool
+import com.luckyhan.studio.mokaeditor.span.character.*
+import com.luckyhan.studio.mokaeditor.span.paragraph.MokaBulletSpan
+import com.luckyhan.studio.mokaeditor.span.paragraph.MokaCheckBoxSpan
+import com.luckyhan.studio.mokaeditor.span.paragraph.MokaQuoteSpan
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,53 +52,53 @@ class MainActivity : AppCompatActivity() {
         }
 
         bullet.setOnClickListener{
-            spanTool.toggleBullet()
+            spanTool.switchSpan(MokaBulletSpan())
         }
         checkbox.setOnClickListener{
-            spanTool.toggleCheckBox()
+            spanTool.switchSpan(MokaCheckBoxSpan(editor))
         }
         quote.setOnClickListener{
-            spanTool.toggleQuote()
+            spanTool.switchSpan(MokaQuoteSpan())
         }
 
         bold.setOnClickListener{
-            spanTool.toggleBold()
+            spanTool.switchSpan(MokaBoldSpan())
         }
         underline.setOnClickListener{
-            spanTool.toggleUnderline()
+            spanTool.switchSpan(MokaUnderlineSpan())
         }
         strikethrough.setOnClickListener{
-            spanTool.toggleStrikethrough()
+            spanTool.switchSpan(MokaStrikethroughSpan())
         }
 
         sizeSmall.setOnClickListener{
-            spanTool.setFontSize(0.8f)
+            spanTool.replaceSpan(MokaFontSizeSpan(0.8f))
         }
         sizeNormal.setOnClickListener{
-            spanTool.setFontSize(1.0f)
+            spanTool.replaceSpan(MokaFontSizeSpan(1.0f))
         }
         sizeLarge.setOnClickListener{
-            spanTool.setFontSize(1.5f)
+            spanTool.replaceSpan(MokaFontSizeSpan(1.5f))
         }
 
         fblue.setOnClickListener{
-            spanTool.setForegroundColor(Color.BLUE)
+            spanTool.replaceSpan(MokaForegroundColorSpan(Color.BLUE))
         }
         fred.setOnClickListener{
-            spanTool.setForegroundColor(Color.RED)
+            spanTool.replaceSpan(MokaForegroundColorSpan(Color.RED))
         }
         fblack.setOnClickListener{
-            spanTool.setForegroundColor(editor.currentTextColor)
+            spanTool.replaceSpan(MokaForegroundColorSpan(editor.currentTextColor))
         }
 
         bblue.setOnClickListener{
-            spanTool.setBackgroundColor(Color.parseColor("#800000ff"))
+            spanTool.replaceSpan(MokaBackgroundColorSpan(Color.parseColor("#800000ff")))
         }
         bred.setOnClickListener{
-            spanTool.setBackgroundColor(Color.parseColor("#80ff0000"))
+            spanTool.replaceSpan(MokaBackgroundColorSpan(Color.parseColor("#80ff0000")))
         }
         bwhite.setOnClickListener{
-            spanTool.setBackgroundColor(Color.TRANSPARENT)
+            spanTool.replaceSpan(MokaBackgroundColorSpan(Color.TRANSPARENT))
         }
     }
 }

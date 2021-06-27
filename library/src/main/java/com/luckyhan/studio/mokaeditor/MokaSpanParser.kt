@@ -1,9 +1,6 @@
 package com.luckyhan.studio.mokaeditor
 
-import android.content.Context
 import android.text.Spannable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
 import android.util.Log
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import com.luckyhan.studio.mokaeditor.span.character.*
@@ -14,7 +11,7 @@ import com.luckyhan.studio.mokaeditor.span.paragraph.MokaStrikeThroughParagraphS
 import org.json.JSONArray
 import org.json.JSONObject
 
-class MokaSpanParser(private val context : Context) {
+class MokaSpanParser {
 
     fun getString(spannable: Spannable): String {
         val spans = spannable.getSpans(0, spannable.length, MokaSpan::class.java)
@@ -55,7 +52,8 @@ class MokaSpanParser(private val context : Context) {
     }
 
     // TextView.setText dose not apply NoCopySpan.
-    fun parseString(text: String): SpannableStringBuilder {
+    // deprecated.
+    /*fun parseString(text: String): SpannableStringBuilder {
         val json = JSONObject(text)
         val rawText = json.getString("text")
         val spanArray = json.getJSONArray("spans")
@@ -109,7 +107,7 @@ class MokaSpanParser(private val context : Context) {
             spannable.setSpan(span, start, end, flag)
         }
         return spannable
-    }
+    }*/
 
     fun getRawText(source : String) : String{
         val json = JSONObject(source)
@@ -117,7 +115,7 @@ class MokaSpanParser(private val context : Context) {
         return rawText
     }
 
-    fun parseString(dest: Spannable, source : String){
+    fun parseString(dest: MokaEditText, source : String){
         val json = JSONObject(source)
         val spanArray = json.getJSONArray("spans")
         for (index in 0 until spanArray.length()) {
@@ -130,7 +128,7 @@ class MokaSpanParser(private val context : Context) {
             val span = when (name) {
                 "checkbox" -> {
                     val checked = spanJson.getBoolean("checked")
-                    MokaCheckBoxSpan(context , dest, checked)
+                    MokaCheckBoxSpan(dest, checked)
                 }
                 "quote" -> {
                     MokaQuoteSpan()
@@ -166,7 +164,7 @@ class MokaSpanParser(private val context : Context) {
                     throw Exception("Not supported span!")
                 }
             }
-            dest.setSpan(span, start, end, flag)
+            dest.text?.setSpan(span, start, end, flag)
         }
     }
 }

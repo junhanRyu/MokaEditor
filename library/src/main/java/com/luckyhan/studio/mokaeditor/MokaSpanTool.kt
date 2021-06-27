@@ -1,15 +1,13 @@
 package com.luckyhan.studio.mokaeditor
 
-import android.graphics.Color
 import android.text.Spannable
+import android.text.style.CharacterStyle
+import android.text.style.ParagraphStyle
 import android.util.Log
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
-import com.luckyhan.studio.mokaeditor.span.character.*
-import com.luckyhan.studio.mokaeditor.span.paragraph.MokaBulletSpan
-import com.luckyhan.studio.mokaeditor.span.paragraph.MokaCheckBoxSpan
-import com.luckyhan.studio.mokaeditor.span.paragraph.MokaQuoteSpan
 import com.luckyhan.studio.mokaeditor.util.MokaTextUtil
 import java.lang.NullPointerException
+import java.lang.UnsupportedOperationException
 
 class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionChangeListener, MokaEditText.TextChangeListener {
 
@@ -22,7 +20,7 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
     private val redoUndoStack: ArrayList<String> = ArrayList()
     private var stackCursor = -1
 
-    var bulleted: Boolean = false
+    /*var bulleted: Boolean = false
         private set
     var underlined: Boolean = false
         private set
@@ -39,7 +37,7 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
     var bolded: Boolean = false
         private set
     var textSized: Float = 1.0f
-        private set
+        private set*/
     var redoable: Boolean = false
         private set
     var undoable: Boolean = false
@@ -57,7 +55,7 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
         editText.selectionChangeListenr = this
         editText.textChangeListener = this
 
-        val parser = MokaSpanParser(context)
+        val parser = MokaSpanParser()
         val currentText = parser.getString(spannable)
         redoUndoStack.add(currentText)
         stackCursor = 0
@@ -65,7 +63,7 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
 
 
     private fun updateToolStates() {
-        bulleted = isThereSpan(MokaBulletSpan::class.java)
+        /*bulleted = isThereSpan(MokaBulletSpan::class.java)
         underlined = isThereSpan(MokaUnderlineSpan::class.java)
         quoted = isThereSpan(MokaQuoteSpan::class.java)
         bolded = isThereSpan(MokaBoldSpan::class.java)
@@ -89,7 +87,7 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
         val fontSizeSpans = spannable.getSpans(selectionStart, selectionEnd, MokaFontSizeSpan::class.java)
         if (fontSizeSpans.isNotEmpty()) {
             textSized = fontSizeSpans[0].proportion
-        }
+        }*/
 
         if (redoUndoStack.isNotEmpty() && stackCursor >= 0) {
             undoable = true
@@ -99,10 +97,56 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
             redoable = true
         }
         toolStateChangeListener?.onToolsStateChanged()
-        val parser = MokaSpanParser(context)
+        val parser = MokaSpanParser()
         Log.d(this.javaClass.name, parser.getString(spannable))
     }
 
+    fun switchSpan(span : MokaSpan){
+        when (span) {
+            is CharacterStyle -> {
+                val isExistSpan = isThereSpan(span.javaClass)
+                if (isExistSpan) {
+                    removeCharacterSpan(span.javaClass)
+                } else {
+                    addCharacterSpan(span)
+                }
+            }
+            is ParagraphStyle -> {
+                val isExistSpan = isThereSpan(span.javaClass)
+                if (isExistSpan) {
+                    removeParagraphSpan(span.javaClass)
+                } else {
+                    addParagraphSpan(span)
+                }
+            }
+            else -> {
+                throw UnsupportedOperationException("Span has to be either CharacterStyle or ParagraphStyle")
+            }
+        }
+    }
+
+    fun replaceSpan(span : MokaSpan){
+        when (span) {
+            is CharacterStyle -> {
+                val isExistSpan = isThereSpan(span.javaClass)
+                if (isExistSpan) {
+                    removeCharacterSpan(span.javaClass)
+                }
+                addCharacterSpan(span)
+            }
+            is ParagraphStyle -> {
+                val isExistSpan = isThereSpan(span.javaClass)
+                if (isExistSpan) {
+                    removeParagraphSpan(span.javaClass)
+                }
+                addParagraphSpan(span)
+            }
+            else -> {
+                throw UnsupportedOperationException("Span has to be either CharacterStyle or ParagraphStyle")
+            }
+        }
+    }
+/*
     fun toggleStrikethrough() {
         val isStrikethrough = isThereSpan(MokaStrikethroughSpan::class.java)
         if (isStrikethrough) {
@@ -195,6 +239,18 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
             val span = MokaCheckBoxSpan(context, spannable)
             addParagraphSpan(span)
         }
+    }*/
+
+    fun <T> getSpan(spanType: Class<T>) : T?{
+        val selectionStart = editText.selectionStart
+        val selectionEnd = editText.selectionEnd
+        val spans = spannable.getSpans(selectionStart, selectionEnd, spanType)
+
+        if(spans?.isNotEmpty() == true){
+            return spans[0]
+        }
+
+        return null
     }
 
     private fun <T> isThereSpan(spanType: Class<T>): Boolean {
@@ -245,11 +301,7 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
         val lines = subString.split('\n')
         var start = lineStart
         var end = lineStart
-        Log.d(this.javaClass.name, "line start : $lineStart, line end : $lineEnd")
-        Log.d(this.javaClass.name, "length : ${spannable.toString().length}")
-        Log.d(this.javaClass.name, "lines : ${lines.size}")
         for (line in lines) {
-            Log.d(this.javaClass.name, "line : $line")
             val otherSpan = span.copy()
             end += line.length
             if (end < spannable.toString().length)
@@ -276,7 +328,7 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
     }
 
     override fun onTextChanged() {
-        val parser = MokaSpanParser(context)
+        val parser = MokaSpanParser()
         val current = parser.getString(spannable)
         while (stackCursor != redoUndoStack.size - 1) {
             redoUndoStack.removeAt(redoUndoStack.size - 1)
@@ -302,12 +354,12 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
     }
 
     private fun setSpansFromJson(jsonString : String){
-        val parser = MokaSpanParser(context)
+        val parser = MokaSpanParser()
         val rawText = parser.getRawText(jsonString)
         editText.textWatcherEnabled = false
         editText.setText(rawText)
         editText.textWatcherEnabled = true
-        parser.parseString(spannable, jsonString)
+        parser.parseString(editText, jsonString)
         editText.setSelection(spannable.length)
     }
 }

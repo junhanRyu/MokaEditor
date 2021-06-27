@@ -11,19 +11,23 @@ import android.text.Spanned
 import android.text.style.LeadingMarginSpan
 import android.util.Log
 import androidx.core.content.ContextCompat
+import androidx.core.text.toSpannable
+import com.luckyhan.studio.mokaeditor.MokaEditText
 import com.luckyhan.studio.mokaeditor.util.MokaDisplayUnitUtil
 import com.luckyhan.studio.mokaeditor.R
 import com.luckyhan.studio.mokaeditor.span.MokaClickable
 import com.luckyhan.studio.mokaeditor.span.MokaCopyable
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
+import java.lang.UnsupportedOperationException
 
 class MokaCheckBoxSpan(
-    private val context: Context,
-    private val spannable: Spannable,
+    private val editText: MokaEditText,
     var checked: Boolean = false,
     private val margin: Int = 100
 ) : LeadingMarginSpan.Standard(margin), MokaClickable, NoCopySpan, MokaSpan {
 
+    private val context: Context = editText.context
+    private val spannable: Spannable = editText.text ?: throw UnsupportedOperationException("EditText is not spannable")
     var checkBoxSize = MokaDisplayUnitUtil.getPxFromDp(context, 24f)
     var unCheckedDrawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_check_box_unchecked)
     var checkedDrawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_check_box_checked)
@@ -89,7 +93,7 @@ class MokaCheckBoxSpan(
     }
 
     override fun copy(): MokaCopyable {
-        return MokaCheckBoxSpan(context, spannable)
+        return MokaCheckBoxSpan(editText)
     }
 
     override fun getSpanTypeName(): String {
