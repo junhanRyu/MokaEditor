@@ -1,7 +1,6 @@
 package com.luckyhan.studio.mokaeditor
 
 import android.graphics.Color
-import android.text.Editable
 import android.text.Spannable
 import android.util.Log
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
@@ -19,7 +18,7 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
             return editText.text ?: throw NullPointerException("Spannable is null")
         }
     private val context = editText.context
-    private var toolsStateChangeListener: RichToolsStateChangeListener? = null
+    private var toolStateChangeListener: SpanToolStateChangeListener? = null
     private val redoUndoStack: ArrayList<String> = ArrayList()
     private var stackCursor = -1
 
@@ -46,8 +45,12 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
     var undoable: Boolean = false
         private set
 
-    interface RichToolsStateChangeListener {
+    interface SpanToolStateChangeListener {
         fun onToolsStateChanged()
+    }
+
+    fun setSpanToolStateChangeListener(listener : SpanToolStateChangeListener){
+        toolStateChangeListener = listener
     }
 
     init {
@@ -95,7 +98,7 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
         if (redoUndoStack.isNotEmpty() && redoUndoStack.size > stackCursor + 1) {
             redoable = true
         }
-
+        toolStateChangeListener?.onToolsStateChanged()
         val parser = MokaSpanParser(context)
         Log.d(this.javaClass.name, parser.getString(spannable))
     }
@@ -270,7 +273,6 @@ class MokaSpanTool(private val editText: MokaEditText) : MokaEditText.SelectionC
 
     override fun onSelectionChanged() {
         updateToolStates()
-        toolsStateChangeListener?.onToolsStateChanged()
     }
 
     override fun onTextChanged() {
