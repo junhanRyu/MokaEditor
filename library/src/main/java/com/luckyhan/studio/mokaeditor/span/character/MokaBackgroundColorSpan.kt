@@ -5,7 +5,7 @@ import android.text.style.BackgroundColorSpan
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 
-class MokaBackgroundColorSpan(val color : Int) : BackgroundColorSpan(color), MokaSpan, NoCopySpan {
+class MokaBackgroundColorSpan(val color : Int) : BackgroundColorSpan(color), MokaSpan {
     override fun getSpanTypeName(): String {
         return "backgroundcolor"
     }

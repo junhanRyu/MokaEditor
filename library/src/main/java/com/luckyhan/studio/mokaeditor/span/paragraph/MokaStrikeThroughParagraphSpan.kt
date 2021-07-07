@@ -7,7 +7,7 @@ import com.luckyhan.studio.mokaeditor.span.MokaCopyable
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 
-class MokaStrikeThroughParagraphSpan : StrikethroughSpan(), MokaSpan, NoCopySpan, ParagraphStyle {
+class MokaStrikeThroughParagraphSpan : StrikethroughSpan(), MokaSpan, ParagraphStyle {
     override fun copy(): MokaCopyable {
         return MokaStrikeThroughParagraphSpan()
     }

@@ -5,7 +5,7 @@ import android.text.style.RelativeSizeSpan
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 
-class MokaFontSizeSpan(val proportion : Float) : RelativeSizeSpan(proportion), MokaSpan, NoCopySpan {
+class MokaFontSizeSpan(val proportion : Float) : RelativeSizeSpan(proportion), MokaSpan {
     override fun copy(): MokaSpan {
         return MokaFontSizeSpan(proportion)
     }

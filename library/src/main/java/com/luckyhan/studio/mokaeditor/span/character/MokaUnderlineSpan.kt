@@ -5,7 +5,7 @@ import android.text.style.UnderlineSpan
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 
-class MokaUnderlineSpan : UnderlineSpan(), MokaSpan, NoCopySpan {
+class MokaUnderlineSpan : UnderlineSpan(), MokaSpan {
     override fun copy(): MokaSpan {
         return MokaUnderlineSpan()
     }

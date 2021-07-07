@@ -1,14 +1,12 @@
 package com.luckyhan.studio.mokaeditor.span.paragraph
 
-import android.graphics.Color
 import android.os.Parcel
-import android.text.NoCopySpan
 import android.text.style.QuoteSpan
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 
 class MokaQuoteSpan(
-    private val mColor : Int = Color.GREEN,
+    private val mColor : Int = 0,
     private val mStripeWidth : Int = 20,
     private val mGapWidth : Int = 40)
     : QuoteSpan(Parcel.obtain().apply {
@@ -16,7 +14,7 @@ class MokaQuoteSpan(
     writeInt(mStripeWidth)
     writeInt(mGapWidth)
     setDataPosition(0)
-}), MokaSpan, NoCopySpan {
+}), MokaSpan {
     override fun copy(): MokaSpan {
         return MokaQuoteSpan()
     }

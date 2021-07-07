@@ -5,7 +5,7 @@ import android.text.style.StrikethroughSpan
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 
-class MokaStrikethroughSpan : StrikethroughSpan(), MokaSpan, NoCopySpan {
+class MokaStrikethroughSpan : StrikethroughSpan(), MokaSpan {
     override fun copy(): MokaSpan {
         return MokaStrikethroughSpan()
     }
