@@ -74,33 +74,33 @@ class MainActivity : AppCompatActivity() {
         }
 
         sizeSmall.setOnClickListener{
-            spanTool.replaceSpan(MokaFontSizeSpan(0.8f))
+            spanTool.replaceCharacterStyleSpan(MokaFontSizeSpan(0.8f))
         }
         sizeNormal.setOnClickListener{
-            spanTool.replaceSpan(MokaFontSizeSpan(1.0f))
+            spanTool.replaceCharacterStyleSpan(MokaFontSizeSpan(1.0f))
         }
         sizeLarge.setOnClickListener{
-            spanTool.replaceSpan(MokaFontSizeSpan(1.5f))
+            spanTool.replaceCharacterStyleSpan(MokaFontSizeSpan(1.5f))
         }
 
         fblue.setOnClickListener{
-            spanTool.replaceSpan(MokaForegroundColorSpan(Color.BLUE))
+            spanTool.replaceCharacterStyleSpan(MokaForegroundColorSpan(Color.BLUE))
         }
         fred.setOnClickListener{
-            spanTool.replaceSpan(MokaForegroundColorSpan(Color.RED))
+            spanTool.replaceCharacterStyleSpan(MokaForegroundColorSpan(Color.RED))
         }
         fblack.setOnClickListener{
-            spanTool.replaceSpan(MokaForegroundColorSpan(editor.currentTextColor))
+            spanTool.replaceCharacterStyleSpan(MokaForegroundColorSpan(editor.currentTextColor))
         }
 
         bblue.setOnClickListener{
-            spanTool.replaceSpan(MokaBackgroundColorSpan(Color.parseColor("#800000ff")))
+            spanTool.replaceCharacterStyleSpan(MokaBackgroundColorSpan(Color.parseColor("#800000ff")))
         }
         bred.setOnClickListener{
-            spanTool.replaceSpan(MokaBackgroundColorSpan(Color.parseColor("#80ff0000")))
+            spanTool.replaceCharacterStyleSpan(MokaBackgroundColorSpan(Color.parseColor("#80ff0000")))
         }
         bwhite.setOnClickListener{
-            spanTool.replaceSpan(MokaBackgroundColorSpan(Color.TRANSPARENT))
+            spanTool.replaceCharacterStyleSpan(MokaBackgroundColorSpan(Color.TRANSPARENT))
         }
     }
 }

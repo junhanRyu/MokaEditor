@@ -89,29 +89,12 @@ class MokaSpanTool(private val editText: MokaEditText, private val parser: MokaS
         }
     }
 
-    //replace spans
-    fun replaceSpan(span: MokaSpan) {
+    fun replaceCharacterStyleSpan(span : MokaSpan){
+        if(span !is MokaCharacterStyle) return
         val selectionStart = editText.selectionStart
         val selectionEnd = editText.selectionEnd
-        when (span) {
-            is CharacterStyle -> {
-                val isExistSpan = isThereSpan(span.javaClass)
-                if (isExistSpan) {
-                    removeCharacterSpan(span.javaClass, selectionStart, selectionEnd)
-                }
-                addCharacterSpan(span)
-            }
-            is ParagraphStyle -> {
-                val isExistSpan = isThereSpan(span.javaClass)
-                if (isExistSpan) {
-                    removeParagraphSpan(span.javaClass, selectionStart, selectionEnd)
-                }
-                addParagraphSpan(span, selectionStart, selectionEnd)
-            }
-            else -> {
-                throw UnsupportedOperationException("Span has to be either CharacterStyle or ParagraphStyle")
-            }
-        }
+        removeCharacterSpan(span.javaClass, selectionStart, selectionEnd)
+        addCharacterSpan(span)
     }
 
     private fun <T> isThereSpan(spanType: Class<T>): Boolean {
@@ -134,18 +117,21 @@ class MokaSpanTool(private val editText: MokaEditText, private val parser: MokaS
             val spanStart = spannable.getSpanStart(span)
             val spanEnd = spannable.getSpanEnd(span)
             spannable.removeSpan(span)
-            if (selectionStart <= spanStart && selectionEnd >= spanEnd) {
-                //remove
-            } else if (selectionStart <= spanStart && selectionEnd < spanEnd) {
-                spannable.setSpan(span, selectionEnd, spanEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
-            } else if (selectionEnd >= spanEnd && selectionStart > spanStart) {
+
+            if((spanStart in selectionStart..selectionEnd) && (spanEnd in selectionStart..selectionEnd)){
+                //just remove span
+            }else if((spanStart in selectionStart..selectionEnd) && (spanEnd > selectionEnd)){
+                spannable.setSpan(span, selectionEnd, spanEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+            }else if((spanEnd in selectionStart..selectionEnd) && (spanStart < selectionStart)){
                 spannable.setSpan(span, spanStart, selectionStart, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-            } else if (selectionStart > spanStart && selectionEnd < spanEnd) {
+            }else if((spanStart < selectionStart && selectionStart < spanEnd-1) && (selectionEnd in (spanStart + 1) until spanEnd)){
                 if (span is MokaSpan) {
-                    val other = span.copy()
-                    spannable.setSpan(span, spanStart, selectionStart, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
-                    spannable.setSpan(other, selectionEnd, spanEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                    val otherSpan = span.copy()
+                    spannable.setSpan(span, selectionEnd, spanEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                    spannable.setSpan(otherSpan, spanStart, selectionStart, Spannable.SPAN_INCLUSIVE_EXCLUSIVE)
                 }
+            }else{
+                throw UnsupportedOperationException("this span range is out of use cases!")
             }
         }
         updateToolStates()
