@@ -15,6 +15,7 @@ import com.luckyhan.studio.mokaeditor.util.MokaDisplayUnitUtil
 import com.luckyhan.studio.mokaeditor.R
 import com.luckyhan.studio.mokaeditor.span.MokaClickable
 import com.luckyhan.studio.mokaeditor.span.MokaCopyable
+import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 import java.lang.UnsupportedOperationException
@@ -24,7 +25,7 @@ class MokaCheckBoxSpan(
     var checked: Boolean = false,
     private val checkboxSize : Float = 28f,
     private val checkBoxPadding: Float = 4f
-) : LeadingMarginSpan, MokaClickable, MokaSpan {
+) : LeadingMarginSpan, MokaClickable, MokaParagraphStyle {
 
     companion object{
         val TAG = "MokaCheckBoxSpan"

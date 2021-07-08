@@ -7,11 +7,16 @@ import android.text.Layout
 import android.text.Spanned
 import android.text.style.LeadingMarginSpan
 import android.util.Log
+import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 
-class MokaBulletSpan(private val mGapWidth: Int = 100, private val mColor: Int = Color.BLACK, private val mRadius: Float = 8f) : LeadingMarginSpan, MokaSpan {
-    companion object{
+class MokaBulletSpan(
+    private val mGapWidth: Int = 100,
+    private val mColor: Int = Color.BLACK,
+    private val mRadius: Float = 8f
+) : LeadingMarginSpan, MokaParagraphStyle {
+    companion object {
         val TAG = "MokaBulletSpan"
     }
 
@@ -48,13 +53,12 @@ class MokaBulletSpan(private val mGapWidth: Int = 100, private val mColor: Int =
         if ((text as Spanned).getSpanStart(this) == startOffset) {
             canvas?.let {
                 paint?.let {
-                    Log.d(TAG, "draw bullet")
                     val style = paint.style
                     val oldColor = paint.color
                     paint.color = mColor
                     paint.style = Paint.Style.FILL
                     val yPosition = (lineTop + lineBottom) / 2f
-                    val xPosition: Float = x + (mGapWidth/2f)
+                    val xPosition: Float = x + (mGapWidth / 2f)
                     canvas.drawCircle(xPosition, yPosition, mRadius, paint)
                     paint.color = oldColor
                     paint.style = style

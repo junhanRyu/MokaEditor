@@ -54,23 +54,23 @@ class MainActivity : AppCompatActivity() {
         }
 
         bullet.setOnClickListener{
-            spanTool.switchSpan(MokaBulletSpan())
+            spanTool.toggleParagraphStyleSpan(MokaBulletSpan())
         }
         checkbox.setOnClickListener{
-            spanTool.switchSpan(MokaCheckBoxSpan(editor))
+            spanTool.toggleParagraphStyleSpan(MokaCheckBoxSpan(editor))
         }
         quote.setOnClickListener{
-            spanTool.switchSpan(MokaQuoteSpan())
+            spanTool.toggleParagraphStyleSpan(MokaQuoteSpan())
         }
 
         bold.setOnClickListener{
-            spanTool.switchSpan(MokaBoldSpan())
+            spanTool.toggleCharacterStyleSpan(MokaBoldSpan())
         }
         underline.setOnClickListener{
-            spanTool.switchSpan(MokaUnderlineSpan())
+            spanTool.toggleCharacterStyleSpan(MokaUnderlineSpan())
         }
         strikethrough.setOnClickListener{
-            spanTool.switchSpan(MokaStrikethroughSpan())
+            spanTool.toggleCharacterStyleSpan(MokaStrikethroughSpan())
         }
 
         sizeSmall.setOnClickListener{

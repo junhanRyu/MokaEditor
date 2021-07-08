@@ -2,10 +2,11 @@ package com.luckyhan.studio.mokaeditor.span.character
 
 import android.text.NoCopySpan
 import android.text.style.RelativeSizeSpan
+import com.luckyhan.studio.mokaeditor.span.MokaCharacterStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 
-class MokaFontSizeSpan(val proportion : Float) : RelativeSizeSpan(proportion), MokaSpan {
+class MokaFontSizeSpan(val proportion : Float) : RelativeSizeSpan(proportion), MokaCharacterStyle {
     override fun copy(): MokaSpan {
         return MokaFontSizeSpan(proportion)
     }

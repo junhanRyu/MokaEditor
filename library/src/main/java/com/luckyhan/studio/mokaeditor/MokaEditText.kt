@@ -2,8 +2,6 @@ package com.luckyhan.studio.mokaeditor
 
 import android.content.Context
 import android.text.*
-import android.text.TextUtils.TruncateAt
-import android.text.style.CharacterStyle
 import android.text.style.ParagraphStyle
 import android.util.AttributeSet
 import android.util.Log
@@ -11,9 +9,9 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatEditText
 import com.luckyhan.studio.mokaeditor.span.MokaClickable
+import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import com.luckyhan.studio.mokaeditor.span.paragraph.MokaStrikeThroughParagraphSpan
 import com.luckyhan.studio.mokaeditor.util.MokaTextUtil
@@ -132,16 +130,17 @@ class MokaEditText : AppCompatEditText {
             if (textWatcherEnabled) {
                 if (s is SpannableStringBuilder && s.textWatcherDepth == 1) {
                     if (isEntered) {
-                        val spans = s.getSpans(start, start, MokaSpan::class.java).filter { (it is ParagraphStyle) }
+                        Log.d(TAG,"Entered!")
+                        val spans = s.getSpans(start, start, MokaParagraphStyle::class.java)
                         for(span in spans){
                             val spanStart = s.getSpanStart(span)
-                            val spanEnd = s.getSpanEnd(span)
                             val otherSpan = span.copy()
-                            s.setSpan(span, spanStart, spanEnd-1, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-                            if(span is MokaStrikeThroughParagraphSpan) continue
                             val afterEnd = start+after
+                            s.setSpan(span, spanStart, start, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                            if(span is MokaStrikeThroughParagraphSpan) continue
                             s.insert(afterEnd, MokaTextUtil.META_CHARACTER)
-                            s.setSpan(otherSpan, afterEnd, afterEnd+1, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                            val lineEnd = MokaTextUtil.getEndOfLine(s.toString(), afterEnd)
+                            s.setSpan(otherSpan, afterEnd, lineEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
                         }
                     }
                 }

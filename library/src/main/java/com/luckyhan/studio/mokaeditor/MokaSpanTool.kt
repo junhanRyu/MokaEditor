@@ -10,7 +10,10 @@ import android.text.style.LeadingMarginSpan
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2
 import android.text.style.ParagraphStyle
 import android.util.Log
+import com.luckyhan.studio.mokaeditor.span.MokaCharacterStyle
+import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
+import com.luckyhan.studio.mokaeditor.span.SelectionMarkupSpan
 import com.luckyhan.studio.mokaeditor.util.MokaTextUtil
 
 class MokaSpanTool(private val editText: MokaEditText, private val parser: MokaSpanParser) : MokaEditText.SelectionChangeListener,
@@ -56,62 +59,59 @@ class MokaSpanTool(private val editText: MokaEditText, private val parser: MokaS
         Log.d(this.javaClass.name, parser.getString(spannable))
     }
 
-    fun switchSpan(span: MokaSpan) {
-        when (span) {
-            is CharacterStyle -> {
-                val isExistSpan = isThereSpan(span.javaClass)
-                if (isExistSpan) {
-                    removeCharacterSpan(span.javaClass)
-                } else {
-                    addCharacterSpan(span)
-                }
-            }
-            is ParagraphStyle -> {
-                val isExistSpan = isThereSpan(span.javaClass)
-                if (isExistSpan) {
-                    removeParagraphSpan(span.javaClass)
-                } else {
-                    addParagraphSpan(span)
-                }
-            }
-            else -> {
-                throw UnsupportedOperationException("Span has to be either CharacterStyle or ParagraphStyle")
-            }
+    //toggle spans
+    fun toggleParagraphStyleSpan(span: MokaSpan) {
+        if(span !is MokaParagraphStyle) return
+        val selectionMarkup = SelectionMarkupSpan()
+        val selectionStart = editText.selectionStart
+        val selectionEnd = editText.selectionEnd
+        spannable.setSpan(selectionMarkup, selectionStart, selectionEnd, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+        val paragraphSpans = spannable.getSpans(selectionStart, selectionEnd, MokaParagraphStyle::class.java)
+        val thatSpans = spannable.getSpans(selectionStart, selectionEnd, span.javaClass)
+        val requestRemove = paragraphSpans.isNotEmpty()
+        val requestSet = thatSpans.isEmpty()
+        if(requestRemove) removeParagraphSpan(MokaParagraphStyle::class.java, selectionStart, selectionEnd)
+        val spanStart = spannable.getSpanStart(selectionMarkup)
+        val spanEnd = spannable.getSpanEnd(selectionMarkup)
+        if(requestSet) addParagraphSpan(span, spanStart, spanEnd)
+        spannable.removeSpan(selectionMarkup)
+    }
+
+    fun toggleCharacterStyleSpan(span : MokaSpan){
+        if(span !is MokaCharacterStyle) return
+        val selectionStart = editText.selectionStart
+        val selectionEnd = editText.selectionEnd
+        val isExistSpan = isThereSpan(span.javaClass)
+        if (isExistSpan) {
+            removeCharacterSpan(span.javaClass, selectionStart, selectionEnd)
+        } else {
+            addCharacterSpan(span)
         }
     }
 
+    //replace spans
     fun replaceSpan(span: MokaSpan) {
+        val selectionStart = editText.selectionStart
+        val selectionEnd = editText.selectionEnd
         when (span) {
             is CharacterStyle -> {
                 val isExistSpan = isThereSpan(span.javaClass)
                 if (isExistSpan) {
-                    removeCharacterSpan(span.javaClass)
+                    removeCharacterSpan(span.javaClass, selectionStart, selectionEnd)
                 }
                 addCharacterSpan(span)
             }
             is ParagraphStyle -> {
                 val isExistSpan = isThereSpan(span.javaClass)
                 if (isExistSpan) {
-                    removeParagraphSpan(span.javaClass)
+                    removeParagraphSpan(span.javaClass, selectionStart, selectionEnd)
                 }
-                addParagraphSpan(span)
+                addParagraphSpan(span, selectionStart, selectionEnd)
             }
             else -> {
                 throw UnsupportedOperationException("Span has to be either CharacterStyle or ParagraphStyle")
             }
         }
-    }
-
-    fun <T> getSpan(spanType: Class<T>): T? {
-        val selectionStart = editText.selectionStart
-        val selectionEnd = editText.selectionEnd
-        val spans = spannable.getSpans(selectionStart, selectionEnd, spanType)
-
-        if (spans?.isNotEmpty() == true) {
-            return spans[0]
-        }
-
-        return null
     }
 
     private fun <T> isThereSpan(spanType: Class<T>): Boolean {
@@ -128,9 +128,7 @@ class MokaSpanTool(private val editText: MokaEditText, private val parser: MokaS
         updateToolStates()
     }
 
-    private fun <T> removeCharacterSpan(classType: Class<T>) {
-        val selectionStart = editText.selectionStart
-        val selectionEnd = editText.selectionEnd
+    private fun <T> removeCharacterSpan(classType: Class<T>, selectionStart : Int, selectionEnd : Int) {
         val spans = spannable.getSpans(selectionStart, selectionEnd, classType)
         for (span in spans) {
             val spanStart = spannable.getSpanStart(span)
@@ -153,9 +151,7 @@ class MokaSpanTool(private val editText: MokaEditText, private val parser: MokaS
         updateToolStates()
     }
 
-    private fun addParagraphSpan(span: MokaSpan) {
-        val selectionStart = editText.selectionStart
-        val selectionEnd = editText.selectionEnd
+    private fun addParagraphSpan(span: MokaSpan, selectionStart : Int, selectionEnd : Int) {
         val lineStart = MokaTextUtil.getStartOfLine(spannable.toString(), selectionStart)
         val lineEnd = MokaTextUtil.getEndOfLine(spannable.toString(), selectionEnd)
         val subString = spannable.toString().substring(lineStart, lineEnd)
@@ -173,12 +169,15 @@ class MokaSpanTool(private val editText: MokaEditText, private val parser: MokaS
         updateToolStates()
     }
 
-    private fun <T> removeParagraphSpan(classType: Class<T>) {
-        val selectionStart = editText.selectionStart
-        val selectionEnd = editText.selectionEnd
+    private fun <T> removeParagraphSpan(classType: Class<T>, selectionStart : Int, selectionEnd : Int) {
         val spans = spannable.getSpans(selectionStart, selectionEnd, classType)
         for (span in spans) {
+            val spanStart = spannable.getSpanStart(span)
+            val spanEnd = spannable.getSpanEnd(span)
             spannable.removeSpan(span)
+            if(spanStart + 1 <= spannable.length && spannable.substring(spanStart, spanStart+1) == MokaTextUtil.META_CHARACTER){
+                spannable.replace(spanStart, spanStart+1, "")
+            }
         }
         updateToolStates()
     }
