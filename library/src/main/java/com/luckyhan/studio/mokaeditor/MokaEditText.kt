@@ -104,10 +104,9 @@ class MokaEditText : AppCompatEditText {
                     val beforeEnd = start+count
                     val subString = s.substring(start, beforeEnd)
                     if(subString.contains(MokaTextUtil.META_CHARACTER)){
-                        Log.d(TAG, "remove paragraphSpan")
                         for(position in start until beforeEnd){
                             if(s[position] == MokaTextUtil.META_CHARACTER[0]){
-                                val spans = s.getSpans(position, position, MokaSpan::class.java).filter { it is ParagraphStyle }
+                                val spans = s.getSpans(position, position, MokaParagraphStyle::class.java)
                                 for(span in spans){
                                     s.removeSpan(span)
                                 }
@@ -145,6 +144,7 @@ class MokaEditText : AppCompatEditText {
                     }
                 }
             }
+            textChangeListener?.onTextChanged()
         }
     }
 
