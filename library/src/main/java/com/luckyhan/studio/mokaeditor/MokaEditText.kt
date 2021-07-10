@@ -1,6 +1,8 @@
 package com.luckyhan.studio.mokaeditor
 
 import android.content.Context
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.*
 import android.text.style.ParagraphStyle
 import android.util.AttributeSet
@@ -22,7 +24,6 @@ class MokaEditText : AppCompatEditText {
 
     companion object {
         val TAG = "MokaEditText"
-
     }
 
     var selectionChangeListenr: SelectionChangeListener? = null
@@ -30,6 +31,7 @@ class MokaEditText : AppCompatEditText {
     var textWatcherEnabled = true
     private val textWatcher = MokaTextWatcher()
     private val CLICK_THRESHOLD = 100
+    var spanParser : MokaSpanParser = DefaultMokaSpanParser()
 
     interface SelectionChangeListener {
         fun onSelectionChanged()
@@ -208,4 +210,44 @@ class MokaEditText : AppCompatEditText {
         }
     }
 
+    override fun onSaveInstanceState(): Parcelable? {
+        val parcelable = super.onSaveInstanceState()
+        return SavedState(parcelable).apply{
+            spannedContents = spanParser.getString(text as Spannable)
+        }
+    }
+
+    override fun onRestoreInstanceState(state: Parcelable?) {
+        when (state) {
+            is SavedState -> {
+                super.onRestoreInstanceState(state.superState)
+                state.spannedContents?.let { spanParser.parseString(this, it) }
+            }
+            else -> super.onRestoreInstanceState(state)
+        }
+    }
+
+    internal class SavedState : BaseSavedState {
+
+        var spannedContents : String? = null
+
+        constructor(superState: Parcelable?) : super(superState)
+
+        constructor(source: Parcel) : super(source) {
+            spannedContents = source.readString()
+        }
+
+        override fun writeToParcel(out: Parcel, flags: Int) {
+            super.writeToParcel(out, flags)
+            out.writeString(spannedContents)
+        }
+
+        companion object {
+            @JvmField
+            val CREATOR = object : Parcelable.Creator<SavedState> {
+                override fun createFromParcel(source: Parcel) = SavedState(source)
+                override fun newArray(size: Int): Array<SavedState?> = arrayOfNulls(size)
+            }
+        }
+    }
 }
