@@ -14,6 +14,8 @@ Android Native Rich Editor Project
 * clickable  
 * redo  
 * undo  
+* image
+* indentation
 
 
 # How to  
