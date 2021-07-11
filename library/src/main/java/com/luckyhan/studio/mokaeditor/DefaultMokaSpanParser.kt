@@ -2,6 +2,7 @@ package com.luckyhan.studio.mokaeditor
 
 import android.text.Spannable
 import android.util.Log
+import android.view.View
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import com.luckyhan.studio.mokaeditor.span.character.*
 import com.luckyhan.studio.mokaeditor.span.paragraph.MokaBulletSpan
@@ -12,8 +13,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.UnsupportedOperationException
 
-class DefaultMokaSpanParser : MokaSpanParser{
-    override fun createSpan(sourceJson : JSONObject, dest : MokaEditText) : MokaSpan {
+class DefaultMokaSpanParser : MokaSpanParser {
+    override fun createSpan(sourceJson: JSONObject, dest: MokaEditText): MokaSpan {
         val name = sourceJson.getString("name")
         Log.d("DefaultMokaSpanParser", name)
         return when (name) {
@@ -51,7 +52,11 @@ class DefaultMokaSpanParser : MokaSpanParser{
                 val color = sourceJson.getInt("color")
                 MokaBackgroundColorSpan(color)
             }
-            else->{
+            MokaImageSpan::class.java.name -> {
+                val imageName = sourceJson.getString("image")
+                MokaImageSpan(dest, imageName)
+            }
+            else -> {
                 throw UnsupportedOperationException("Not supported span!")
             }
         }
@@ -79,16 +84,16 @@ class DefaultMokaSpanParser : MokaSpanParser{
         return json.toString()
     }
 
-    override fun getRawText(source : String) : String{
+    override fun getRawText(source: String): String {
         val json = JSONObject(source)
         val rawText = json.getString("text")
         return rawText
     }
 
-    override fun parseString(dest: MokaEditText, source : String){
-        Log.d("MokaSpanParser", source)
+    override fun parseString(dest: MokaEditText, source: String) {
         val json = JSONObject(source)
         val spanArray = json.getJSONArray("spans")
+
         for (index in 0 until spanArray.length()) {
             val spanJson = spanArray.getJSONObject(index)
             val start = spanJson.getInt("start")

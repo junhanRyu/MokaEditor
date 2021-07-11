@@ -5,6 +5,7 @@ import java.lang.UnsupportedOperationException
 object MokaTextUtil {
 
     val META_CHARACTER = "\uFEFF"
+    val IMAGE_PLACEHOLDER_CHARACTER = "\n\u25A1"
 
     fun getStartOfLine(text: String, offset: Int): Int {
         if (offset < 0 || offset > text.length)

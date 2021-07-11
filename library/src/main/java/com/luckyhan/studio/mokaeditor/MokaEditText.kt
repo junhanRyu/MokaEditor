@@ -9,6 +9,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.ViewTreeObserver
 import android.view.inputmethod.InputConnection
 import android.view.inputmethod.InputConnectionWrapper
 import androidx.appcompat.widget.AppCompatEditText
@@ -44,10 +45,19 @@ class MokaEditText : AppCompatEditText {
     override fun onSelectionChanged(selStart: Int, selEnd: Int) {
         val source = text.toString()
 
-        if(selStart == selEnd && selStart < source.length && (source.isNotEmpty()) && source.substring(selStart, selStart+1) == MokaTextUtil.META_CHARACTER){
+        if(selStart == selEnd && selStart < source.length &&
+            (source.isNotEmpty()) &&
+            source.substring(selStart, selStart+1) == MokaTextUtil.META_CHARACTER){
             Log.d(TAG, "selection adjust start : $selStart, end : $selEnd")
             setSelection(selStart+1)
-        }else{
+        }
+        else if(selStart == selEnd && selStart < source.length &&
+            (source.isNotEmpty()) &&
+            source.substring(selStart, selStart+1)[0] == MokaTextUtil.IMAGE_PLACEHOLDER_CHARACTER[1]){
+            Log.d(TAG, "selection adjust start : $selStart, end : $selEnd")
+            setSelection(selStart-1)
+        }
+        else{
             super.onSelectionChanged(selStart, selEnd)
             selectionChangeListenr?.onSelectionChanged()
             Log.d(TAG, "selection start : $selStart, end : $selEnd")
@@ -154,7 +164,7 @@ class MokaEditText : AppCompatEditText {
     init {
         // hardwareAccelerator makes text layout overlapped vertically.
         //setLayerType(LAYER_TYPE_SOFTWARE, null)
-        setLineSpacing(0f, 1.2f)
+        //setLineSpacing(0f, 1.2f)
         addTextChangedListener(textWatcher)
     }
 
@@ -205,7 +215,6 @@ class MokaEditText : AppCompatEditText {
         return spans?.filter {
             val posX = x.roundToInt() - totalPaddingLeft
             val posY = y.roundToInt() - totalPaddingTop
-            Log.d("RichCheckBoxSpan", "posX : $posX, posY : $posY")
             (posX in it.clickableLeft..it.clickableRight && posY in it.clickableTop..it.clickableBottom)
         }
     }
@@ -217,11 +226,44 @@ class MokaEditText : AppCompatEditText {
         }
     }
 
+
+    // very tricky. spans have to be restored after layouting edittext view. so, this callback is used.
+    // if I can find any better way to resolve this problem, I have to refactor this implementation.
+    interface GlobalLayoutListenerCallback{
+        fun finished()
+    }
+
+    inner class GlobalLayoutListenr(
+        var contents : String? = null,
+        var callback : GlobalLayoutListenerCallback? = null)
+        : ViewTreeObserver.OnGlobalLayoutListener{
+        override fun onGlobalLayout() {
+            contents?.let{
+                val source = it
+                spanParser.parseString(this@MokaEditText, source)
+            }
+            callback?.finished()
+        }
+    }
+
+    private val globalLayoutListerCallback = object : GlobalLayoutListenerCallback{
+        override fun finished() {
+            viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
+        }
+    }
+
+    val globalLayoutListener = GlobalLayoutListenr()
+
     override fun onRestoreInstanceState(state: Parcelable?) {
         when (state) {
             is SavedState -> {
                 super.onRestoreInstanceState(state.superState)
-                state.spannedContents?.let { spanParser.parseString(this, it) }
+                state.spannedContents?.let {
+                    spanParser.parseString(this, it)
+                    globalLayoutListener.contents = it
+                    globalLayoutListener.callback = globalLayoutListerCallback
+                    viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)
+                }
             }
             else -> super.onRestoreInstanceState(state)
         }

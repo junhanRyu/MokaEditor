@@ -7,6 +7,7 @@ import com.luckyhan.studio.mokaeditor.span.MokaCharacterStyle
 import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import com.luckyhan.studio.mokaeditor.span.SelectionMarkupSpan
+import com.luckyhan.studio.mokaeditor.span.character.MokaImageSpan
 import com.luckyhan.studio.mokaeditor.util.MokaTextUtil
 import kotlinx.coroutines.CoroutineScope
 
@@ -57,6 +58,13 @@ class MokaSpanTool(
         undoable = redoUndoStack.isNotEmpty() && stackCursor - 1 >= 0
         redoable = redoUndoStack.isNotEmpty() && redoUndoStack.size > stackCursor + 1
         toolStateChangeListener?.onToolsStateChanged()
+    }
+
+    fun setImageSpan(span : MokaImageSpan){
+        val selectionEnd = editText.selectionEnd
+        editText.setSelection(selectionEnd)
+        spannable.insert(selectionEnd, MokaTextUtil.IMAGE_PLACEHOLDER_CHARACTER)
+        spannable.setSpan(span, selectionEnd+1, selectionEnd+2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 
     //toggle spans
