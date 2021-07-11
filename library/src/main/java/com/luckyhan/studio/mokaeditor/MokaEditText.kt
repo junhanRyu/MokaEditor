@@ -104,7 +104,6 @@ class MokaEditText : AppCompatEditText {
     }*/
 
     inner class MokaTextWatcher : TextWatcher {
-        var spanCollector: MokaSpanCollector? = null
         var start: Int = 0
         var before: Int = 0
         var after: Int = 0
