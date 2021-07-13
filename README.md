@@ -17,6 +17,10 @@ Android Native Rich Editor Project
 * image
 * indentation
 
+# Known issues
+* text is overlapped vertically if your application uses hardware acceleration. in order to work around this, you have to disable it like 
+<application android:hardwareAccelerated="false" ...>
+    
 
 # How to  
 
