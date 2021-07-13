@@ -4,18 +4,13 @@ import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.*
-import android.text.style.ParagraphStyle
 import android.util.AttributeSet
 import android.util.Log
-import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.ViewTreeObserver
-import android.view.inputmethod.InputConnection
-import android.view.inputmethod.InputConnectionWrapper
 import androidx.appcompat.widget.AppCompatEditText
 import com.luckyhan.studio.mokaeditor.span.MokaClickable
 import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
-import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import com.luckyhan.studio.mokaeditor.span.paragraph.MokaStrikeThroughParagraphSpan
 import com.luckyhan.studio.mokaeditor.util.MokaTextUtil
 import kotlin.math.roundToInt
@@ -48,60 +43,18 @@ class MokaEditText : AppCompatEditText {
         if(selStart == selEnd && selStart < source.length &&
             (source.isNotEmpty()) &&
             source.substring(selStart, selStart+1) == MokaTextUtil.META_CHARACTER){
-            Log.d(TAG, "selection adjust start : $selStart, end : $selEnd")
             setSelection(selStart+1)
         }
         else if(selStart == selEnd && selStart < source.length &&
             (source.isNotEmpty()) &&
             source.substring(selStart, selStart+1)[0] == MokaTextUtil.IMAGE_PLACEHOLDER_CHARACTER[1]){
-            Log.d(TAG, "selection adjust start : $selStart, end : $selEnd")
             setSelection(selStart-1)
         }
         else{
             super.onSelectionChanged(selStart, selEnd)
             selectionChangeListenr?.onSelectionChanged()
-            Log.d(TAG, "selection start : $selStart, end : $selEnd")
         }
     }
-
-
-    inner class MokaInputConnection(inputConnection: InputConnection?) : InputConnectionWrapper(inputConnection, true) {
-        override fun sendKeyEvent(event: KeyEvent?): Boolean {
-            if (event?.action == KeyEvent.ACTION_DOWN) {
-                if (event?.keyCode == KeyEvent.KEYCODE_DEL) {
-                    val targetString = getTextBeforeCursor(1, 0)
-                    if (targetString == "\n") {
-                        val spans = text?.getSpans(selectionStart, selectionEnd, MokaSpan::class.java)
-                        val paragraphSpans = spans?.filter { it is ParagraphStyle }
-                        if (paragraphSpans?.isNotEmpty() == true) {
-                            Log.d(TAG, "paragraphSpans")
-                            for (spanIndex in paragraphSpans.indices) {
-                                text?.removeSpan(paragraphSpans[spanIndex])
-                            }
-                            return true
-                        }
-                    }
-                } else if (event?.keyCode == KeyEvent.KEYCODE_ENTER) {
-                    val spans = text?.getSpans(selectionStart, selectionEnd, MokaSpan::class.java)
-                    val paragraphSpans = spans?.filter { it is ParagraphStyle }
-                    if (paragraphSpans?.isNotEmpty() == true) {
-                        val otherSpan = paragraphSpans[0].copy()
-
-                    }
-                }
-            }
-            return super.sendKeyEvent(event)
-        }
-
-        override fun commitText(text: CharSequence?, newCursorPosition: Int): Boolean {
-            Log.d(TAG, "commitText -> string : ${getTextBeforeCursor(1, 0)}")
-            return super.commitText(text, newCursorPosition)
-        }
-    }
-
-    /*override fun onCreateInputConnection(outAttrs: EditorInfo?): InputConnection? {
-        return MokaInputConnection(super.onCreateInputConnection(outAttrs))
-    }*/
 
     inner class MokaTextWatcher : TextWatcher {
         var start: Int = 0
@@ -161,7 +114,8 @@ class MokaEditText : AppCompatEditText {
 
 
     init {
-        // hardwareAccelerator makes text layout overlapped vertically.
+        // hardwareAccelerator makes text layout overlapped vertically. user's application should disable hardwareAcceleration in Manifest like below
+        // <application android:hardwareAccelerated="false" ...>
         //setLayerType(LAYER_TYPE_SOFTWARE, null)
         //setLineSpacing(0f, 1.2f)
         addTextChangedListener(textWatcher)
@@ -225,7 +179,6 @@ class MokaEditText : AppCompatEditText {
         }
     }
 
-
     // very tricky. spans have to be restored after layouting edittext view. so, this callback is used.
     // if I can find any better way to resolve this problem, I have to refactor this implementation.
     interface GlobalLayoutListenerCallback{
@@ -258,7 +211,6 @@ class MokaEditText : AppCompatEditText {
             is SavedState -> {
                 super.onRestoreInstanceState(state.superState)
                 state.spannedContents?.let {
-                    spanParser.parseString(this, it)
                     globalLayoutListener.contents = it
                     globalLayoutListener.callback = globalLayoutListerCallback
                     viewTreeObserver.addOnGlobalLayoutListener(globalLayoutListener)

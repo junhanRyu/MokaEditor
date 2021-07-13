@@ -51,9 +51,26 @@ class MokaImageSpan(
         return rect.right
     }
 
-    override fun draw(canvas: Canvas, text: CharSequence?, start: Int, end: Int, x: Float, top: Int, y: Int, bottom: Int, paint: Paint) {
-        super.draw(canvas, text, start, end, x, top, y, bottom, paint)
-    }
+    /*override fun draw(canvas: Canvas, text: CharSequence?, start: Int, end: Int, x: Float, top: Int, y: Int, bottom: Int, paint: Paint) {
+        //super.draw(canvas, text, start, end, x, top, y, bottom, paint)
+
+        val b = getCachedDrawable()
+
+        b?.let{
+            canvas.save()
+
+            var transY = bottom - b.bounds.bottom
+            if (mVerticalAlignment == ALIGN_BASELINE) {
+                transY -= paint.fontMetricsInt.descent
+            } else if (mVerticalAlignment == ALIGN_CENTER) {
+                transY = top + (bottom - top) / 2 - b.bounds.height() / 2
+            }
+
+            canvas.translate(x, transY.toFloat())
+            b.draw(canvas)
+            canvas.restore()
+        }
+    }*/
 
     private fun getResizedDrawableBounds(d: Drawable?): Rect {
         if (d == null || d.intrinsicWidth == 0) {
