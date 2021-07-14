@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.os.Parcelable
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Button
@@ -27,6 +28,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var imageView: ImageView
     private lateinit var spanTool: MokaSpanTool
     private lateinit var editext: MokaEditText
+
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable("spantool", spanTool.saveInstanceState())
+    }
 
     private val galleryActivity = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -102,6 +109,14 @@ class MainActivity : AppCompatActivity() {
 
         spanTool = MokaSpanTool(editext, lifecycleScope)
         editext.textChangeListener = spanTool
+
+        savedInstanceState?.let{
+            val spanToolParcel = savedInstanceState.getParcelable<Parcelable>("spantool")
+            spanToolParcel?.let{
+                spanTool.restoreSavedInstanceState(spanToolParcel)
+            }
+        }
+
 
         image.setOnClickListener {
             val intent = Intent(

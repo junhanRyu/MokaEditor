@@ -1,8 +1,11 @@
 package com.luckyhan.studio.mokaeditor
 
+import android.os.Parcel
+import android.os.Parcelable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.util.Log
+import android.view.View
 import com.luckyhan.studio.mokaeditor.span.MokaCharacterStyle
 import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
@@ -18,6 +21,50 @@ class MokaSpanTool(
 ) : MokaEditText.SelectionChangeListener,
     MokaEditText.TextChangeListener {
 
+    fun restoreSavedInstanceState(source: Parcelable) {
+        if (source is SavedState) {
+            redoUndoStack = source.stack ?: ArrayList()
+            stackCursor = source.stackCursor ?: -1
+            updateToolStates()
+        }
+    }
+
+    fun saveInstanceState(): Parcelable {
+        return SavedState(stackCursor, redoUndoStack)
+    }
+
+    internal class SavedState(
+        var stackCursor: Int? = null,
+        var stack: ArrayList<String>? = null
+    ) : Parcelable {
+
+
+        constructor(parcel: Parcel) : this() {
+            stackCursor = parcel.readInt()
+            stack = parcel.readArrayList(null) as ArrayList<String>
+        }
+
+        override fun describeContents(): Int {
+            return 0
+        }
+
+        override fun writeToParcel(dest: Parcel?, flags: Int) {
+            dest?.writeInt(stackCursor ?: -1)
+            dest?.writeList(stack)
+        }
+
+
+        companion object CREATOR : Parcelable.Creator<SavedState> {
+            override fun createFromParcel(parcel: Parcel): SavedState {
+                return SavedState(parcel)
+            }
+
+            override fun newArray(size: Int): Array<SavedState?> {
+                return arrayOfNulls(size)
+            }
+        }
+    }
+
     companion object {
         val TAG = "MokaSpanTool"
     }
@@ -28,7 +75,7 @@ class MokaSpanTool(
         }
     private var toolStateChangeListener: SpanToolStateChangeListener? = null
 
-    private val redoUndoStack: ArrayList<String> = ArrayList()
+    private var redoUndoStack: ArrayList<String> = ArrayList()
     private var stackCursor = -1
     private val redoUndoDebounceInterval = 400L
     private var redoUndoDebounce = MokaDebounce(redoUndoDebounceInterval, coroutineScope)
@@ -60,11 +107,11 @@ class MokaSpanTool(
         toolStateChangeListener?.onToolsStateChanged()
     }
 
-    fun setImageSpan(span : MokaImageSpan){
+    fun setImageSpan(span: MokaImageSpan) {
         val selectionEnd = editText.selectionEnd
         editText.setSelection(selectionEnd)
         spannable.insert(selectionEnd, MokaTextUtil.IMAGE_PLACEHOLDER_CHARACTER)
-        spannable.setSpan(span, selectionEnd+1, selectionEnd+2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(span, selectionEnd + 1, selectionEnd + 2, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
 
     //toggle spans
@@ -156,7 +203,6 @@ class MokaSpanTool(
             spannable.insert(start, MokaTextUtil.META_CHARACTER)
             val end = start + line.length + 1
             spannable.setSpan(otherSpan, start, end, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-            Log.d(MokaEditText.TAG, "start : $start, end : $end, text : ${spannable.substring(start, end)}")
             start = end + 1
 
         }
@@ -181,7 +227,6 @@ class MokaSpanTool(
     }
 
     override fun onTextChanged() {
-        Log.d(TAG, "onTextChanged")
         if (!redoUndoStackInitialized) {
             redoUndoStackInitialized = true
             return
@@ -193,7 +238,6 @@ class MokaSpanTool(
                 val currentContent = parser.getString(spannable)
                 redoUndoStack.add(currentContent)
                 stackCursor = redoUndoStack.size - 1
-                Log.d(TAG, "requested cursor : $stackCursor, content : $currentContent")
             }
         }
     }
@@ -217,7 +261,6 @@ class MokaSpanTool(
         if (redoUndoStack.isNotEmpty() && stackCursor - 1 >= 0) {
             stackCursor--
             val text = redoUndoStack[stackCursor]
-            Log.d(TAG, "undo text : $text")
             setSpansFromJson(text)
         }
     }
@@ -232,4 +275,6 @@ class MokaSpanTool(
         parser.parseString(editText, jsonString)
         editText.setSelection(spannable.length)
     }
+
+
 }
