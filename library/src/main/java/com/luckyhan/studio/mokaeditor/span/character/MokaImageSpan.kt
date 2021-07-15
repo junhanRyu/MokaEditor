@@ -1,10 +1,12 @@
 package com.luckyhan.studio.mokaeditor.span.character
 
+import android.content.Context
 import android.graphics.*
 import android.graphics.drawable.Drawable
 import android.text.style.ImageSpan
 import android.util.Log
 import android.widget.EditText
+import com.luckyhan.studio.mokaeditor.R
 import com.luckyhan.studio.mokaeditor.span.MokaCharacterStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
@@ -15,7 +17,7 @@ import java.lang.ref.WeakReference
 class MokaImageSpan(
     private val editText: EditText,
     private val imageName: String
-) : ImageSpan(editText.context, getBitmap(imageDir, imageName)), MokaCharacterStyle {
+) : ImageSpan(editText.context, getBitmap(editText.context, imageDir, imageName)), MokaCharacterStyle {
 
     private var mDrawableRef: WeakReference<Drawable>? = null
     private val mContainerWidth = editText.measuredWidth
@@ -25,14 +27,14 @@ class MokaImageSpan(
         // this has to be initialized before used.
         var imageDir: File? = null
 
-        fun getBitmap(dir: File?, name: String): Bitmap {
+        fun getBitmap(context : Context, dir: File?, name: String): Bitmap {
             if (dir?.exists() == true) {
                 val imageFile = File(dir, name)
                 if (imageFile.exists()) {
                     return BitmapFactory.decodeFile(imageFile.path)
                 } else Log.d("MokaImageSpan", "no file")
             }
-            return Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+            return BitmapFactory.decodeResource(context.resources, R.drawable.ic_baseline_broken_image_24)
         }
     }
 
