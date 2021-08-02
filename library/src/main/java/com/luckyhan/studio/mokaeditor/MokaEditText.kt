@@ -86,14 +86,12 @@ class MokaEditText : AppCompatEditText {
             this.before = before
             this.after = count
             isEntered = count == 1 && s?.substring(start, start + count)?.contains("\n") == true
-            Log.d(TAG,"start : ${start}, before : $before, after : $after, str : ${s?.substring(start, start + after)}")
         }
 
         override fun afterTextChanged(s: Editable?) {
             if (textWatcherEnabled) {
                 if (s is SpannableStringBuilder && s.textWatcherDepth == 1) {
                     if (isEntered) {
-                        Log.d(TAG,"Entered!")
                         val spans = s.getSpans(start, start, MokaParagraphStyle::class.java)
                         for(span in spans){
                             val spanStart = s.getSpanStart(span)

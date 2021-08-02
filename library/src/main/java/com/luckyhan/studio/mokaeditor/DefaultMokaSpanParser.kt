@@ -16,7 +16,6 @@ import java.lang.UnsupportedOperationException
 class DefaultMokaSpanParser : MokaSpanParser {
     override fun createSpan(sourceJson: JSONObject, dest: MokaEditText): MokaSpan {
         val name = sourceJson.getString("name")
-        Log.d("DefaultMokaSpanParser", name)
         return when (name) {
             MokaCheckBoxSpan::class.java.name -> {
                 val checked = sourceJson.getBoolean("checked")

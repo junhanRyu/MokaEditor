@@ -4,8 +4,6 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
-import android.util.Log
-import android.view.View
 import com.luckyhan.studio.mokaeditor.span.MokaCharacterStyle
 import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
@@ -152,11 +150,18 @@ class MokaSpanTool(
         addCharacterSpan(span)
     }
 
-    private fun <T> isThereSpan(spanType: Class<T>): Boolean {
+    fun <T> isThereSpan(spanType: Class<T>): Boolean {
         val selectionStart = editText.selectionStart
         val selectionEnd = editText.selectionEnd
         val spans = spannable.getSpans(selectionStart, selectionEnd, spanType)
         return spans.isNotEmpty()
+    }
+
+    fun <T> getSpans(spanType: Class<T>): List<T> {
+        val selectionStart = editText.selectionStart
+        val selectionEnd = editText.selectionEnd
+        val spans = spannable.getSpans(selectionStart, selectionEnd, spanType)
+        return spans.toList()
     }
 
     private fun addCharacterSpan(span: MokaSpan) {
