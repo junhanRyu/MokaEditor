@@ -13,7 +13,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.lang.UnsupportedOperationException
 
-class DefaultMokaSpanParser : MokaSpanParser {
+open class DefaultMokaSpanParser : MokaSpanParser {
     override fun createSpan(sourceJson: JSONObject, dest: MokaEditText): MokaSpan {
         val name = sourceJson.getString("name")
         return when (name) {
