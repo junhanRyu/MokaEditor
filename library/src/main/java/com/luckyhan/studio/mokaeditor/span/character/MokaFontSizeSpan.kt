@@ -1,6 +1,5 @@
 package com.luckyhan.studio.mokaeditor.span.character
 
-import android.text.NoCopySpan
 import android.text.style.RelativeSizeSpan
 import com.luckyhan.studio.mokaeditor.span.MokaCharacterStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan

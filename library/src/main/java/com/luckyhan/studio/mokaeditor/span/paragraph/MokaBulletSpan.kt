@@ -21,7 +21,7 @@ class MokaBulletSpan(
     }
 
     override fun copy(): MokaSpan {
-        return MokaBulletSpan()
+        return MokaBulletSpan(mGapWidth, mColor, mRadius)
     }
 
     override fun getSpanTypeName(): String {

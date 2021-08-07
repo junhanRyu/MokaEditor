@@ -33,13 +33,13 @@ class MokaSpanTool(
 
     internal class SavedState(
         var stackCursor: Int? = null,
-        var stack: ArrayList<String>? = null
+        var stack: ArrayList<Pair<String, Int>>? = null
     ) : Parcelable {
 
 
         constructor(parcel: Parcel) : this() {
             stackCursor = parcel.readInt()
-            stack = parcel.readArrayList(null) as ArrayList<String>
+            stack = parcel.readArrayList(null) as ArrayList<Pair<String, Int>>
         }
 
         override fun describeContents(): Int {
@@ -71,11 +71,12 @@ class MokaSpanTool(
         get() {
             return editText.text as SpannableStringBuilder
         }
-    private var toolStateChangeListener: SpanToolStateChangeListener? = null
 
-    private var redoUndoStack: ArrayList<String> = ArrayList()
+    var toolStateChangeListener: SpanToolStateChangeListener? = null
+    var redoUndoDebounceInterval = 400L
+
+    private var redoUndoStack: ArrayList<Pair<String, Int>> = ArrayList()
     private var stackCursor = -1
-    private val redoUndoDebounceInterval = 400L
     private var redoUndoDebounce = MokaDebounce(redoUndoDebounceInterval, coroutineScope)
     private var redoUndoStackLocked = false
     private var redoUndoStackInitialized = false
@@ -89,12 +90,8 @@ class MokaSpanTool(
         fun onToolsStateChanged()
     }
 
-    fun setSpanToolStateChangeListener(listener: SpanToolStateChangeListener) {
-        toolStateChangeListener = listener
-    }
-
     init {
-        editText.selectionChangeListenr = this
+        editText.selectionChangeListener = this
         editText.textChangeListener = this
     }
 
@@ -171,6 +168,13 @@ class MokaSpanTool(
         updateToolStates()
     }
 
+    fun <T> removeCharacterSpan(classType: Class<T>){
+        if (classType !is MokaCharacterStyle) return
+        val selectionStart = editText.selectionStart
+        val selectionEnd = editText.selectionEnd
+        removeCharacterSpan(classType, selectionStart, selectionEnd)
+    }
+
     private fun <T> removeCharacterSpan(classType: Class<T>, selectionStart: Int, selectionEnd: Int) {
         val spans = spannable.getSpans(selectionStart, selectionEnd, classType)
         for (span in spans) {
@@ -236,12 +240,11 @@ class MokaSpanTool(
             redoUndoStackInitialized = true
             return
         }
-
         if (!redoUndoStackLocked) {
             redoUndoDebounce.request {
                 dumpStackItems()
                 val currentContent = parser.getString(spannable)
-                redoUndoStack.add(currentContent)
+                redoUndoStack.add(Pair(currentContent, editText.selectionStart))
                 stackCursor = redoUndoStack.size - 1
             }
         }
@@ -257,8 +260,7 @@ class MokaSpanTool(
         if (redoUndoStack.isNotEmpty() && stackCursor + 1 < redoUndoStack.size) {
             stackCursor++
             val text = redoUndoStack[stackCursor]
-
-            setSpansFromJson(text)
+            restoreSpansFromJson(text.first, text.second)
         }
     }
 
@@ -266,11 +268,11 @@ class MokaSpanTool(
         if (redoUndoStack.isNotEmpty() && stackCursor - 1 >= 0) {
             stackCursor--
             val text = redoUndoStack[stackCursor]
-            setSpansFromJson(text)
+            restoreSpansFromJson(text.first, text.second)
         }
     }
 
-    private fun setSpansFromJson(jsonString: String) {
+    private fun restoreSpansFromJson(jsonString: String, selection : Int) {
         val rawText = parser.getRawText(jsonString)
         editText.textWatcherEnabled = false
         redoUndoStackLocked = true
@@ -278,7 +280,8 @@ class MokaSpanTool(
         redoUndoStackLocked = false
         editText.textWatcherEnabled = true
         parser.parseString(editText, jsonString)
-        editText.setSelection(spannable.length)
+        if(editText.length() > selection) editText.setSelection(selection)
+        //editText.setSelection(spannable.length)
     }
 
 

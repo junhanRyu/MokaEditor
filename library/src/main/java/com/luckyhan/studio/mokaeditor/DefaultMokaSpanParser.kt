@@ -1,8 +1,6 @@
 package com.luckyhan.studio.mokaeditor
 
 import android.text.Spannable
-import android.util.Log
-import android.view.View
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import com.luckyhan.studio.mokaeditor.span.character.*
 import com.luckyhan.studio.mokaeditor.span.paragraph.MokaBulletSpan
@@ -92,7 +90,6 @@ open class DefaultMokaSpanParser : MokaSpanParser {
     override fun parseString(dest: MokaEditText, source: String) {
         val json = JSONObject(source)
         val spanArray = json.getJSONArray("spans")
-
         for (index in 0 until spanArray.length()) {
             val spanJson = spanArray.getJSONObject(index)
             val start = spanJson.getInt("start")

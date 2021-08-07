@@ -15,7 +15,7 @@ class MokaQuoteSpan(
     private val mGapWidth : Int = 80)
     : MokaParagraphStyle, LeadingMarginSpan {
     override fun copy(): MokaSpan {
-        return MokaQuoteSpan()
+        return MokaQuoteSpan(mColor, mStripeWidth, mGapWidth)
     }
 
     override fun getSpanTypeName(): String {

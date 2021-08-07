@@ -1,19 +1,34 @@
 package com.luckyhan.studio.mokaeditor
 
+import android.R
+import android.R.attr
 import android.content.Context
 import android.os.Parcel
 import android.os.Parcelable
 import android.text.*
 import android.util.AttributeSet
-import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.ViewTreeObserver
+import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.AppCompatEditText
 import com.luckyhan.studio.mokaeditor.span.MokaClickable
 import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.span.paragraph.MokaStrikeThroughParagraphSpan
 import com.luckyhan.studio.mokaeditor.util.MokaTextUtil
 import kotlin.math.roundToInt
+import android.R.attr.mode
+
+import android.widget.Toast
+
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context.CLIPBOARD_SERVICE
+import android.util.Log
+import kotlin.math.max
+import kotlin.math.min
 
 
 class MokaEditText : AppCompatEditText {
@@ -22,12 +37,17 @@ class MokaEditText : AppCompatEditText {
         val TAG = "MokaEditText"
     }
 
-    var selectionChangeListenr: SelectionChangeListener? = null
-    var textChangeListener: TextChangeListener? = null
-    var textWatcherEnabled = true
     private val textWatcher = MokaTextWatcher()
     private val CLICK_THRESHOLD = 100
-    var spanParser : MokaSpanParser = DefaultMokaSpanParser()
+
+    var selectionChangeListener: SelectionChangeListener? = null
+    var textChangeListener: TextChangeListener? = null
+    var spanClickListener: MokaSpanClickListener? = null
+    var spanParser: MokaSpanParser = DefaultMokaSpanParser()
+    var isEnabledClickable = true
+    var textWatcherEnabled = true
+
+    private val clipBoard = context.getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
 
     interface SelectionChangeListener {
         fun onSelectionChanged()
@@ -37,22 +57,107 @@ class MokaEditText : AppCompatEditText {
         fun onTextChanged()
     }
 
+    interface MokaSpanClickListener {
+        fun onSpanClicked(span: MokaClickable)
+    }
+
+    init {
+        addTextChangedListener(textWatcher)
+        customSelectionActionModeCallback = object : android.view.ActionMode.Callback {
+            override fun onCreateActionMode(mode: android.view.ActionMode?, menu: Menu?): Boolean {
+                return true
+            }
+
+            override fun onPrepareActionMode(mode: android.view.ActionMode?, menu: Menu?): Boolean {
+                return false
+            }
+
+            override fun onActionItemClicked(mode: android.view.ActionMode?, item: MenuItem?): Boolean {
+                item?.let{
+                    when (item.itemId) {
+                        R.id.copy -> {
+                            val contents = text ?: ""
+                            var min = 0
+                            var max: Int = contents.length
+                            if (isFocused) {
+                                val selStart: Int = selectionStart
+                                val selEnd: Int = selectionEnd
+                                min = max(0, min(selStart, selEnd))
+                                max = max(0, max(selStart, selEnd))
+                            }
+                            val subString = contents.substring(min, max)
+                            subString.replace(MokaTextUtil.META_CHARACTER,"")
+                            // Perform your definition lookup with the selected text
+                            val text = subString.toString()
+                            val clip = ClipData.newPlainText("text", text)
+                            clipBoard.setPrimaryClip(clip)
+                            // Finish and close the ActionMode
+                            mode?.finish()
+                            Log.d(TAG, "copied")
+                            return true
+                        }
+                        R.id.cut -> {
+                            val contents = text ?: ""
+                            var min = 0
+                            var max: Int = contents.length
+                            if (isFocused) {
+                                val selStart: Int = selectionStart
+                                val selEnd: Int = selectionEnd
+                                min = max(0, min(selStart, selEnd))
+                                max = max(0, max(selStart, selEnd))
+                            }
+                            val subString = contents.substring(min, max)
+                            subString.replace(MokaTextUtil.META_CHARACTER,"")
+                            // Perform your definition lookup with the selected text
+                            val text = subString.toString()
+                            val clip = ClipData.newPlainText("text", text)
+                            clipBoard.setPrimaryClip(clip)
+                            // Finish and close the ActionMode
+                            val spannableStringBuilder = SpannableStringBuilder.valueOf(contents)
+                            spannableStringBuilder.replace(min, max, "")
+                            mode?.finish()
+                            Log.d(TAG, "cut")
+                            return true
+                        }
+                        R.id.paste ->
+                            return false
+                        else -> {
+                        }
+                    }
+                }
+                return false
+            }
+
+            override fun onDestroyActionMode(mode: android.view.ActionMode?) {
+
+            }
+        }
+    }
+
+    override fun setText(text: CharSequence?, type: BufferType?) {
+        super.setText(text, type)
+        val updateSpan = UpdateSpan()
+        this.text?.setSpan(updateSpan, 0, this.text?.length ?: 0, Spannable.SPAN_INCLUSIVE_INCLUSIVE)
+    }
+
     override fun onSelectionChanged(selStart: Int, selEnd: Int) {
         val source = text.toString()
 
-        if(selStart == selEnd && selStart < source.length &&
+        // adjust selection cursor because we have to hide special characters to users.
+        if (selStart == selEnd && selStart < source.length &&
             (source.isNotEmpty()) &&
-            source.substring(selStart, selStart+1) == MokaTextUtil.META_CHARACTER){
-            setSelection(selStart+1)
-        }
-        else if(selStart == selEnd && selStart < source.length &&
+            source.substring(selStart, selStart + 1) == MokaTextUtil.META_CHARACTER
+        ) {
+            setSelection(selStart + 1)
+        } else if (selStart == selEnd && selStart < source.length &&
             (source.isNotEmpty()) &&
-            source.substring(selStart, selStart+1)[0] == MokaTextUtil.IMAGE_PLACEHOLDER_CHARACTER[1]){
-            setSelection(selStart-1)
-        }
-        else{
+            source.substring(selStart, selStart + 1)[0] == MokaTextUtil.IMAGE_PLACEHOLDER_CHARACTER[1]
+        ) {
+            setSelection(selStart - 1)
+        } else {
             super.onSelectionChanged(selStart, selEnd)
-            selectionChangeListenr?.onSelectionChanged()
+            // setSelection will be called recursively. so, this listener will called always even if selection is the use cases of special characters.
+            selectionChangeListener?.onSelectionChanged()
         }
     }
 
@@ -63,17 +168,16 @@ class MokaEditText : AppCompatEditText {
         var isEntered = false
 
         override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-            if (textWatcherEnabled) {
-                if (s is SpannableStringBuilder && count > 0 && s.textWatcherDepth == 1) {
-                    val beforeEnd = start+count
-                    val subString = s.substring(start, beforeEnd)
-                    if(subString.contains(MokaTextUtil.META_CHARACTER)){
-                        for(position in start until beforeEnd){
-                            if(s[position] == MokaTextUtil.META_CHARACTER[0]){
-                                val spans = s.getSpans(position, position, MokaParagraphStyle::class.java)
-                                for(span in spans){
-                                    s.removeSpan(span)
-                                }
+            // we have to check textWatcherDepth. because this listener can be called recursively.
+            if (s is SpannableStringBuilder && count > 0 && s.textWatcherDepth == 1 && textWatcherEnabled) {
+                val beforeEnd = start + count
+                val subString = s.substring(start, beforeEnd)
+                if (subString.contains(MokaTextUtil.META_CHARACTER)) {
+                    for (position in start until beforeEnd) {
+                        if (s[position] == MokaTextUtil.META_CHARACTER[0]) {
+                            val spans = s.getSpans(position, position, MokaParagraphStyle::class.java)
+                            for (span in spans) {
+                                s.removeSpan(span)
                             }
                         }
                     }
@@ -85,56 +189,45 @@ class MokaEditText : AppCompatEditText {
             this.start = start
             this.before = before
             this.after = count
-            isEntered = count == 1 && s?.substring(start, start + count)?.contains("\n") == true
+            isEntered = count == 1 && (s?.substring(start, start + count)?.contains("\n") == true)
         }
 
         override fun afterTextChanged(s: Editable?) {
-            if (textWatcherEnabled) {
-                if (s is SpannableStringBuilder && s.textWatcherDepth == 1) {
-                    if (isEntered) {
-                        val spans = s.getSpans(start, start, MokaParagraphStyle::class.java)
-                        for(span in spans){
-                            val spanStart = s.getSpanStart(span)
-                            val otherSpan = span.copy()
-                            val afterEnd = start+after
-                            s.setSpan(span, spanStart, start, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-                            if(span is MokaStrikeThroughParagraphSpan) continue
-                            s.insert(afterEnd, MokaTextUtil.META_CHARACTER)
-                            val lineEnd = MokaTextUtil.getEndOfLine(s.toString(), afterEnd)
-                            s.setSpan(otherSpan, afterEnd, lineEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
-                        }
+            // we have to check textWatcherDepth. because this listener can be called recursively.
+            if (s is SpannableStringBuilder && s.textWatcherDepth == 1 && textWatcherEnabled) {
+                if (isEntered) {
+                    val spans = s.getSpans(start, start, MokaParagraphStyle::class.java)
+                    for (span in spans) {
+                        val spanStart = s.getSpanStart(span)
+                        val otherSpan = span.copy()
+                        val afterEnd = start + after
+                        s.setSpan(span, spanStart, start, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
+                        if (span is MokaStrikeThroughParagraphSpan) continue
+                        s.insert(afterEnd, MokaTextUtil.META_CHARACTER)
+                        val lineEnd = MokaTextUtil.getEndOfLine(s.toString(), afterEnd)
+                        s.setSpan(otherSpan, afterEnd, lineEnd, Spannable.SPAN_EXCLUSIVE_INCLUSIVE)
                     }
                 }
+                textChangeListener?.onTextChanged()
             }
-            textChangeListener?.onTextChanged()
         }
     }
 
+    constructor(context: Context) : super(context)
 
-    init {
-        // hardwareAccelerator makes text layout overlapped vertically. user's application should disable hardwareAcceleration in Manifest like below
-        // <application android:hardwareAccelerated="false" ...>
-        //setLayerType(LAYER_TYPE_SOFTWARE, null)
-        //setLineSpacing(0f, 1.2f)
-        addTextChangedListener(textWatcher)
-    }
-
-    constructor(context: Context) : super(context) {
-    }
-
-    constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-    }
+    constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        event?.let {
+        if (isEnabledClickable && event != null) {
             val duration = (event.eventTime) - (event.downTime)
+            val clickableSpans = getClickableSpans(event.x, event.y)
             when (event.action) {
                 MotionEvent.ACTION_UP -> {
                     if (duration < CLICK_THRESHOLD) {
-                        val clickableSpans = getClickableSpans(event.x, event.y)
                         if (clickableSpans?.isNotEmpty() == true) {
                             clickableSpans.forEach {
                                 it.onClicked()
+                                spanClickListener?.onSpanClicked(it)
                             }
                             return true
                         }
@@ -142,7 +235,6 @@ class MokaEditText : AppCompatEditText {
                     return super.onTouchEvent(event)
                 }
                 MotionEvent.ACTION_DOWN -> {
-                    val clickableSpans = getClickableSpans(event.x, event.y)
                     return if (clickableSpans?.isNotEmpty() == true)
                         true
                     else
@@ -170,25 +262,18 @@ class MokaEditText : AppCompatEditText {
         }
     }
 
-    override fun onSaveInstanceState(): Parcelable? {
-        val parcelable = super.onSaveInstanceState()
-        return SavedState(parcelable).apply{
-            spannedContents = spanParser.getString(text as Spannable)
-        }
-    }
-
     // very tricky. spans have to be restored after layouting edittext view. so, this callback is used.
     // if I can find any better way to resolve this problem, I have to refactor this implementation.
-    interface GlobalLayoutListenerCallback{
+    interface GlobalLayoutListenerCallback {
         fun finished()
     }
 
-    inner class GlobalLayoutListenr(
-        var contents : String? = null,
-        var callback : GlobalLayoutListenerCallback? = null)
-        : ViewTreeObserver.OnGlobalLayoutListener{
+    inner class GlobalLayoutListener(
+        var contents: String? = null,
+        var callback: GlobalLayoutListenerCallback? = null
+    ) : ViewTreeObserver.OnGlobalLayoutListener {
         override fun onGlobalLayout() {
-            contents?.let{
+            contents?.let {
                 val source = it
                 spanParser.parseString(this@MokaEditText, source)
             }
@@ -196,13 +281,20 @@ class MokaEditText : AppCompatEditText {
         }
     }
 
-    private val globalLayoutListerCallback = object : GlobalLayoutListenerCallback{
+    private val globalLayoutListerCallback = object : GlobalLayoutListenerCallback {
         override fun finished() {
             viewTreeObserver.removeOnGlobalLayoutListener(globalLayoutListener)
         }
     }
 
-    val globalLayoutListener = GlobalLayoutListenr()
+    private val globalLayoutListener = GlobalLayoutListener()
+
+    override fun onSaveInstanceState(): Parcelable? {
+        val parcelable = super.onSaveInstanceState()
+        return SavedState(parcelable).apply {
+            spannedContents = spanParser.getString(text as Spannable)
+        }
+    }
 
     override fun onRestoreInstanceState(state: Parcelable?) {
         when (state) {
@@ -220,7 +312,7 @@ class MokaEditText : AppCompatEditText {
 
     internal class SavedState : BaseSavedState {
 
-        var spannedContents : String? = null
+        var spannedContents: String? = null
 
         constructor(superState: Parcelable?) : super(superState)
 

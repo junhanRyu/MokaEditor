@@ -12,7 +12,7 @@ class MokaIndentationSpan(
     private val mGapWidth : Int = 80)
     : MokaParagraphStyle, LeadingMarginSpan {
     override fun copy(): MokaSpan {
-        return MokaIndentationSpan()
+        return MokaIndentationSpan(mGapWidth)
     }
 
     override fun getSpanTypeName(): String {

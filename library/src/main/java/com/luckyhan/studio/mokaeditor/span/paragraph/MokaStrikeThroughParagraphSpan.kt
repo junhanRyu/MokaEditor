@@ -1,11 +1,8 @@
 package com.luckyhan.studio.mokaeditor.span.paragraph
 
-import android.text.NoCopySpan
-import android.text.style.ParagraphStyle
 import android.text.style.StrikethroughSpan
 import com.luckyhan.studio.mokaeditor.span.MokaCopyable
 import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
-import com.luckyhan.studio.mokaeditor.span.MokaSpan
 import org.json.JSONObject
 
 class MokaStrikeThroughParagraphSpan : StrikethroughSpan(), MokaParagraphStyle {

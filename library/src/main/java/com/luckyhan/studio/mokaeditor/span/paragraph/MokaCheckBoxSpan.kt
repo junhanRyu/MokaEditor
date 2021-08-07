@@ -18,18 +18,19 @@ import com.luckyhan.studio.mokaeditor.span.MokaCopyable
 import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.util.MokaDisplayUnitUtil
 import org.json.JSONObject
+import kotlin.math.roundToInt
 
 class MokaCheckBoxSpan(
     private val editText: MokaEditText,
     var checked: Boolean = false,
-    private val checkboxWidth : Float = 28f,
-    private val checkBoxPaddingLeft: Float = 4f,
-    private val checkBoxPaddingRight: Float = 4f,
-    private val checkBoxPaddingTop: Float = 2f,
-    private val checkBoxPaddingBottom: Float = 2f,
-    ) : LeadingMarginSpan, MokaClickable, MokaParagraphStyle, LineHeightSpan {
+    private val checkboxWidth: Float = 28f,
+    private val checkBoxMarginLeft: Float = 4f,
+    private val checkBoxMarginRight: Float = 4f,
+    private val checkBoxMarginTop: Float = 2f,
+    private val checkBoxMarginBottom: Float = 2f,
+) : LeadingMarginSpan, MokaClickable, MokaParagraphStyle, LineHeightSpan {
 
-    companion object{
+    companion object {
         val TAG = "MokaCheckBoxSpan"
     }
 
@@ -38,10 +39,10 @@ class MokaCheckBoxSpan(
     var checkBoxSize = MokaDisplayUnitUtil.getPxFromDp(context, checkboxWidth)
     var unCheckedDrawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_check_box_unchecked)
     var checkedDrawable: Drawable? = ContextCompat.getDrawable(context, R.drawable.ic_check_box_checked)
-    var paddingLeft = MokaDisplayUnitUtil.getPxFromDp(context, checkBoxPaddingLeft)
-    var paddingRight = MokaDisplayUnitUtil.getPxFromDp(context, checkBoxPaddingRight)
-    var paddingTop = MokaDisplayUnitUtil.getPxFromDp(context, checkBoxPaddingTop)
-    var paddingBottom = MokaDisplayUnitUtil.getPxFromDp(context, checkBoxPaddingBottom)
+    var marginLeft = MokaDisplayUnitUtil.getPxFromDp(context, checkBoxMarginLeft)
+    var marginRight = MokaDisplayUnitUtil.getPxFromDp(context, checkBoxMarginRight)
+    var marginTop = MokaDisplayUnitUtil.getPxFromDp(context, checkBoxMarginTop)
+    var marginBottom = MokaDisplayUnitUtil.getPxFromDp(context, checkBoxMarginBottom)
 
     override var clickableLeft: Int = 0
     override var clickableRight: Int = 0
@@ -68,7 +69,7 @@ class MokaCheckBoxSpan(
     }
 
     override fun getLeadingMargin(first: Boolean): Int {
-        return (checkBoxSize + paddingLeft + paddingRight)
+        return (checkBoxSize + marginLeft + marginRight)
     }
 
     override fun drawLeadingMargin(
@@ -88,10 +89,10 @@ class MokaCheckBoxSpan(
         val drawable = if (checked) checkedDrawable else unCheckedDrawable
         canvas?.let {
             if ((text as Spanned).getSpanStart(this) == startOffset) {
-                clickableLeft = x + paddingLeft
+                clickableLeft = x + marginLeft
                 clickableRight = clickableLeft + checkBoxSize
-                clickableTop = lineTop + ((lineBottom - lineTop - checkBoxSize) / 2)
-                clickableBottom = clickableTop + checkBoxSize
+                clickableTop = lineTop + marginTop
+                clickableBottom = lineBottom - marginBottom
                 drawable?.setBounds(clickableLeft, clickableTop, clickableRight, clickableBottom)
                 drawable?.draw(canvas)
             }
@@ -100,7 +101,7 @@ class MokaCheckBoxSpan(
     }
 
     override fun copy(): MokaCopyable {
-        return MokaCheckBoxSpan(editText)
+        return MokaCheckBoxSpan(editText, false, checkboxWidth, checkBoxMarginLeft, checkBoxMarginRight, checkBoxMarginTop, checkBoxMarginBottom)
     }
 
     override fun getSpanTypeName(): String {
@@ -112,20 +113,26 @@ class MokaCheckBoxSpan(
     }
 
     override fun chooseHeight(text: CharSequence?, start: Int, end: Int, spanstartv: Int, lineHeight: Int, fm: Paint.FontMetricsInt?) {
-        fm?.let{
-            val checkBoxHeight = checkBoxSize
+        fm?.let {
+            val expectedHeight = checkBoxSize + marginTop + marginBottom
             val originHeight = fm.descent - fm.ascent
             // If original height is not positive, do nothing.
             // If original height is not positive, do nothing.
+            Log.d(TAG, "before bottom ${fm.bottom}, top ${fm.top}, ascent ${fm.ascent}, descent ${fm.descent}, ")
+            Log.d(TAG, "start : $start, end : $end, spanstart : $spanstartv")
             if (originHeight <= 0) {
                 return
             }
-            Log.d(TAG, "origin : $originHeight , checkbox height : $checkBoxHeight")
-            if(originHeight < checkBoxHeight){
-                Log.d(TAG, "height is adjusted")
-                val ratio: Float = checkBoxHeight * 1.0f / originHeight
-                fm.descent = Math.round(fm.descent * ratio)
-                fm.ascent = fm.descent - checkBoxHeight.toInt()
+            if (originHeight < expectedHeight) {
+                val ratio: Float = expectedHeight * 1.0f / originHeight
+                fm.descent = (fm.descent * ratio).roundToInt()
+                fm.ascent = (fm.ascent * ratio).roundToInt()
+                fm.top = fm.ascent
+                fm.bottom = fm.descent
+                Log.d(
+                    TAG,
+                    "descent ${fm.descent}, ascent ${fm.ascent}, expect $expectedHeight, origin $originHeight, bottom ${fm.bottom}, top ${fm.top}"
+                )
             }
         }
     }
