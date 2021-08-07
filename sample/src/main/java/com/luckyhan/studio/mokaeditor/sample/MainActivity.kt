@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.luckyhan.studio.mokaeditor.MokaEditText
 import com.luckyhan.studio.mokaeditor.MokaSpanTool
+import com.luckyhan.studio.mokaeditor.span.MokaCharacterStyle
 import com.luckyhan.studio.mokaeditor.span.character.*
 import com.luckyhan.studio.mokaeditor.span.paragraph.MokaBulletSpan
 import com.luckyhan.studio.mokaeditor.span.paragraph.MokaCheckBoxSpan
@@ -133,8 +134,11 @@ class MainActivity : AppCompatActivity() {
             spanTool.redo()
         }
 
+        bullet.text = "remove"
         bullet.setOnClickListener {
-            spanTool.toggleParagraphStyleSpan(MokaBulletSpan())
+            //spanTool.toggleParagraphStyleSpan(MokaBulletSpan())
+            spanTool.removeCharacterSpan(MokaCharacterStyle::class.java)
+
         }
         checkbox.setOnClickListener {
             spanTool.toggleParagraphStyleSpan(MokaCheckBoxSpan(editext))

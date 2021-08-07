@@ -4,6 +4,7 @@ import android.os.Parcel
 import android.os.Parcelable
 import android.text.Spannable
 import android.text.SpannableStringBuilder
+import android.util.Log
 import com.luckyhan.studio.mokaeditor.span.MokaCharacterStyle
 import com.luckyhan.studio.mokaeditor.span.MokaParagraphStyle
 import com.luckyhan.studio.mokaeditor.span.MokaSpan
@@ -169,7 +170,6 @@ class MokaSpanTool(
     }
 
     fun <T> removeCharacterSpan(classType: Class<T>){
-        if (classType !is MokaCharacterStyle) return
         val selectionStart = editText.selectionStart
         val selectionEnd = editText.selectionEnd
         removeCharacterSpan(classType, selectionStart, selectionEnd)
@@ -177,11 +177,11 @@ class MokaSpanTool(
 
     private fun <T> removeCharacterSpan(classType: Class<T>, selectionStart: Int, selectionEnd: Int) {
         val spans = spannable.getSpans(selectionStart, selectionEnd, classType)
+
         for (span in spans) {
             val spanStart = spannable.getSpanStart(span)
             val spanEnd = spannable.getSpanEnd(span)
             spannable.removeSpan(span)
-
             if ((spanStart in selectionStart..selectionEnd) && (spanEnd in selectionStart..selectionEnd)) {
                 //just remove span
             } else if ((spanStart in selectionStart..selectionEnd) && (spanEnd > selectionEnd)) {
