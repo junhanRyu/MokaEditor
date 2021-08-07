@@ -118,8 +118,6 @@ class MokaCheckBoxSpan(
             val originHeight = fm.descent - fm.ascent
             // If original height is not positive, do nothing.
             // If original height is not positive, do nothing.
-            Log.d(TAG, "before bottom ${fm.bottom}, top ${fm.top}, ascent ${fm.ascent}, descent ${fm.descent}, ")
-            Log.d(TAG, "start : $start, end : $end, spanstart : $spanstartv")
             if (originHeight <= 0) {
                 return
             }
@@ -129,10 +127,6 @@ class MokaCheckBoxSpan(
                 fm.ascent = (fm.ascent * ratio).roundToInt()
                 fm.top = fm.ascent
                 fm.bottom = fm.descent
-                Log.d(
-                    TAG,
-                    "descent ${fm.descent}, ascent ${fm.ascent}, expect $expectedHeight, origin $originHeight, bottom ${fm.bottom}, top ${fm.top}"
-                )
             }
         }
     }
